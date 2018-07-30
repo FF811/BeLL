@@ -513,29 +513,38 @@ bool display_funktion()
 	float x = -2;
 	float y = -2;
 	
-	glBegin(GL_LINE_STRIP);
+	
+	
 	glColor3f(0, 0, 0);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	if (d3d(fctsh)) 
 	{
 		while (x < 2)
-		{
+		{	
+			glBegin(GL_TRIANGLE_STRIP);
 			y = -2;
 			while (y < 2) {
 				glVertex3f(x, y, to_value(fctsh, x, y, true));
-				y = y + 0.05;
+				glVertex3f(x+0.2, y, to_value(fctsh, x+0.2, y, true));
+				y = y + 0.2;
 			}
-			x = x + 0.05;
+			x = x + 0.2;
+			glEnd();
 		}
 	}
 	else {
+		glBegin(GL_LINE_STRIP);
 		while (x < 2)
 		{
-
+			
 			glVertex3f(x, to_value(fctsh, x, y, false),0);
 			x = x + 0.05;
+			
 		}
+		glEnd();
 	}
-	glEnd();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBegin(GL_LINES);
 	glVertex3f(-100, 0, 0); glVertex3f(100, 0, 0);
 	glVertex3f(0,-100, 0); glVertex3f(0,100, 0);
@@ -750,7 +759,6 @@ int main(int argc, char **argv)
 
 
 
-
 	//glClearColor(1, 0, 0, 1);
 	quadric = gluNewQuadric();
 
@@ -764,6 +772,7 @@ int main(int argc, char **argv)
 	// set up example model view matrix
 	glMatrixMode(GL_MODELVIEW);
 	glm::mat4 m = glm::lookAt(vec3(10,10,10), vec3(0, 0, 0), vec3(0, 0, 1));
+
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
 
