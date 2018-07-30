@@ -1,0 +1,9 @@
+.vs/*
+Debug/*
+Release/*
+*.sdf
+*.obj
+*.log
+*.suo
+build/*
+*.user
