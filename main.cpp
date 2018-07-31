@@ -54,8 +54,8 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 }
 
 bool wired = true;
-bool move = false;
-int x2, y2, xw, yw = 0;
+bool moveit = false;
+float x2, y2, xw, yw, counterz,diffz = 0;
 std::string fctsh="x x * y y * + ";
 
 
@@ -108,23 +108,14 @@ static void callback_MouseButton(GLFWwindow *win, int button, int action, int mo
 {
 	void* user_pointer = glfwGetWindowUserPointer(win);
 
-	/*if (button == GLFW_MOUSE_BUTTON_LEFT)
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
 	{
-		move = true;
+		moveit = true;
 		if (action == GLFW_RELEASE)
 		{
-			move = false;
+			moveit = false;
 		}
-	}*/
-	//Checkbox
-	/*if (cb1->checked())
-	{
-	cb2->setChecked(false);
 	}
-	else
-	{
-	cb2->setChecked(true);
-	}*/
 	screen->mouseButtonCallbackEvent(button, action, mods);
 }
 
@@ -134,6 +125,9 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 {
 	void* user_pointer = glfwGetWindowUserPointer(win);
 	screen->cursorPosCallbackEvent(x, y);
+	diffz = x - counterz;
+	counterz = x;
+	std::cout << diffz << "     " <<moveit<< std::endl;
 	w->setPosition(Eigen::Vector2i(870, 10));
 	w3->setPosition(Eigen::Vector2i(10, 650));
 	w2->setPosition(Eigen::Vector2i(15, 88));
@@ -411,50 +405,6 @@ float to_value(string post, float x, float y, bool d)
 }
 
 
-void draw_cube(int red, int green, int blue)
-{
-
-	glBegin(GL_QUADS);
-
-	glColor3f(red, green, blue);
-	glNormal3f(0, 0, 1);
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 1, 0);
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 1, 0);
-	glVertex3f(0, 1, 1);
-	glVertex3f(0, 0, 1);
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(1, 0, 1);
-	glVertex3f(0, 0, 1);
-
-	glVertex3f(1, 1, 1);
-	glVertex3f(1, 1, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(1, 0, 1);
-
-	glVertex3f(1, 1, 1);
-	glVertex3f(1, 0, 1);
-	glVertex3f(0, 0, 1);
-	glVertex3f(0, 1, 1);
-
-	glVertex3f(1, 1, 1);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 1, 0);
-	glVertex3f(0, 1, 1);
-
-	glEnd();
-
-
-}
-
-
 
 // main display function. this will be called once per frame.
 bool display_funktion()
@@ -469,6 +419,10 @@ bool display_funktion()
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+	if (moveit && diffz!=0) {
+		diffz = diffz * 0.36;
+		glRotatef(diffz, 0, 0, 1);
+	}
 	if (d3d(fctsh)) 
 	{
 		while (x < 2)
@@ -495,6 +449,7 @@ bool display_funktion()
 		}
 		glEnd();
 	}
+	//glPopMatrix();
 	{glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBegin(GL_LINES);
 	glVertex3f(-100, 0, 0); glVertex3f(100, 0, 0);
@@ -710,7 +665,7 @@ int main(int argc, char **argv)
 
 	// set up example model view matrix
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(10,10,10), vec3(0, 0, 0), vec3(0, 0, 1));
+	glm::mat4 m = glm::lookAt(vec3(10,8,16), vec3(0, 0, 0), vec3(0, 0, 1));
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
