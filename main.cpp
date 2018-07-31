@@ -55,7 +55,7 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 
 bool wired = true;
 bool moveit = false;
-float x2, y2, xw, yw, counterz,diffz = 0;
+float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy = 0;
 std::string fctsh="x x * y y * + ";
 
 
@@ -125,9 +125,11 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 {
 	void* user_pointer = glfwGetWindowUserPointer(win);
 	screen->cursorPosCallbackEvent(x, y);
+	diffxy = y - counterxy;
 	diffz = x - counterz;
+	counterxy = y;
 	counterz = x;
-	std::cout << diffz << "     " <<moveit<< std::endl;
+	//std::cout << diffz << "     " <<moveit<< std::endl;
 	w->setPosition(Eigen::Vector2i(870, 10));
 	w3->setPosition(Eigen::Vector2i(10, 650));
 	w2->setPosition(Eigen::Vector2i(15, 88));
@@ -419,9 +421,11 @@ bool display_funktion()
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
-	if (moveit && diffz!=0) {
+	if (moveit && diffz!=0 && diffxy!=0) {
 		diffz = diffz * 0.36;
+		diffxy = diffxy * 0.36;
 		glRotatef(diffz, 0, 0, 1);
+		glRotatef(diffxy, -1, 1, 0);
 	}
 	if (d3d(fctsh)) 
 	{
@@ -431,10 +435,10 @@ bool display_funktion()
 			y = -2;
 			while (y < 2) {
 				glVertex3f(x, y, to_value(fctsh, x, y, true));
-				glVertex3f(x+0.2, y, to_value(fctsh, x+0.2, y, true));
-				y = y + 0.2;
+				glVertex3f(x+0.4, y, to_value(fctsh, x+0.4, y, true));
+				y = y + 0.4;
 			}
-			x = x + 0.2;
+			x = x + 0.4;
 			glEnd();
 		}
 	}
