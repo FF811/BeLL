@@ -39,7 +39,10 @@ nanogui::CheckBox *cb1 = nullptr;
 nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
-
+nanogui::Button *bf[10] = { nullptr };
+nanogui::CheckBox *bfsupp[10] = { nullptr };
+nanogui::Button *b = nullptr;
+int functionnumber = 0;
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -510,6 +513,7 @@ bool display_funktion()
 		beta = beta + 2;
 	};*/
 
+
 	float x = -2;
 	float y = -2;
 	
@@ -627,7 +631,7 @@ int main(int argc, char **argv)
 		TextBox *t = new TextBox(Eingabe);
 		t->setEditable(true);
 		t->setFixedSize(Vector2i(110, 20));
-		t->setValue("x x *");
+		t->setValue("x^27");
 		t->setFontSize(20);
 		t->setTooltip("Funktion eingeben");
 		//t->setCallback( [] {btnaddcallback(); });
@@ -638,15 +642,19 @@ int main(int argc, char **argv)
 		a->setFixedSize(Vector2i(20, 20));
 		a->setFontSize(28);
 		a->setTooltip("Vorlagen");
-	
-
+		
+		
 		//add Button
-		Button *b = new Button(Eingabe, "+");
+		b = new Button(Eingabe, "+");
 		b->setFixedSize(Vector2i(20, 20));
 		b->setFontSize(28);
 		b->setTooltip("Funktion hinzufuegen");
 		b->setCallback([&t] {fctsh = t->value(); fctsh = to_postfix(fctsh); 
-		
+		bf[functionnumber]->setCaption(t->value());
+		bf[functionnumber]->setEnabled(true);
+		bfsupp[functionnumber]->setEnabled(true);
+		bfsupp[functionnumber]->setChecked(true);
+		functionnumber++;
 		});
 
 	}
@@ -662,8 +670,30 @@ int main(int argc, char **argv)
 		w2->setFixedSize(Vector2i(180, 300));
 		w2->setLayout(new GroupLayout());	
 		
-	
 	}
+	
+
+	
+	//Button for fnct 
+
+
+	for (int i = 0; i < 10; i++)
+	{
+		Widget *Eingabe = new Widget(w2);
+		Eingabe->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
+		bf[i] = new Button(Eingabe, "Funktion?");
+		bf[i]->setFixedSize(Vector2i(120, 20));
+		bf[i]->setVisible(true);
+		bf[i]->setEnabled(false);
+		bf[i]->setFontSize(15);
+		bfsupp[i] = new CheckBox(Eingabe, "~");
+		bfsupp[i]->setFixedSize(Vector2i(20, 20));
+		bfsupp[i]->setVisible(true);
+		bfsupp[i]->setEnabled(false);
+		bfsupp[i]->setFontSize(15);
+	}	
+
+		
 	/*************************************
 	Label für Funktionsbearbeitungsbuttons
 	*************************************/
