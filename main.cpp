@@ -53,7 +53,7 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 	screen->resizeCallbackEvent(wi, h);
 }
 
-bool cube = true;
+bool wired = true;
 bool move = false;
 int x2, y2, xw, yw = 0;
 std::string fctsh="x x * y y * + ";
@@ -91,19 +91,11 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 
 	if (key == GLFW_KEY_W && action == GLFW_RELEASE)
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		wired=true;
 	}
 	if (key == GLFW_KEY_S && action == GLFW_RELEASE)
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-	if (key == GLFW_KEY_7 && action == GLFW_RELEASE)
-	{
-		cube = false;
-	}
-	if (key == GLFW_KEY_8 && action == GLFW_RELEASE)
-	{
-		cube = true;
+		wired=false;
 	}
 	screen->keyCallbackEvent(key, scancode, action, mods);
 
@@ -470,54 +462,13 @@ bool display_funktion()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*if (cube)
-	{
-		glPushMatrix();
-		glTranslatef(-0.5, -0.5, -0.5);
-		draw_cube(0, 1, 0);
-		glPopMatrix();
-	}
-	else
-	{
-		glColor3f(1, 1, 0);
-
-		glMaterialf(GL_FRONT, GL_SHININESS, 120);
-		float specReflection[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-		glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
-
-		gluSphere(quadric, 0.5, 128, 64);
-
-
-		glColor3f(1, 1, 1);
-
-		glPushMatrix();
-		glRotatef(alpha, 0, 1, 1);
-		glTranslatef(1, 0, 0);
-		glRotatef(alpha, 0, 1, 0);
-		gluSphere(quadric, 0.2, 128, 64);
-
-		glPushMatrix();
-
-		glColor3f(0.2, 1, 0);
-		glRotatef(beta, 0, 0, 1);
-		glTranslatef(0.5, 0, 0);
-		gluSphere(quadric, 0.1, 32, 16);
-
-
-		glPopMatrix();
-		glPopMatrix();
-		++alpha;
-		beta = beta + 2;
-	};*/
-
 	float x = -2;
 	float y = -2;
 	
-	
-	
 	glColor3f(0, 0, 0);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	if (d3d(fctsh)) 
 	{
 		while (x < 2)
@@ -544,31 +495,18 @@ bool display_funktion()
 		}
 		glEnd();
 	}
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	{glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBegin(GL_LINES);
 	glVertex3f(-100, 0, 0); glVertex3f(100, 0, 0);
-	glVertex3f(0,-100, 0); glVertex3f(0,100, 0);
+	glVertex3f(0, -100, 0); glVertex3f(0, 100, 0);
 	glVertex3f(0, 0, -100); glVertex3f(0, 0, 100);
-	glEnd();
-
-	/*
-	glBegin(GL_LINE_STRIP);
-	glColor3f(1, 0, 1);
-	glVertex3f(0, 0, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(0, 0, 1);
-
-	glColor3f(1, 1, 1);
-	glVertex3f(0, 1, 0);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 1, 1);
-
-	glEnd();
-	*/
+	glEnd(); }
 	return true;
 }
 
-
+/****************************************************************************
+stupid functions of the program
+*****************************************************************************/
 
 
 /****************************************************************************
@@ -607,7 +545,8 @@ int main(int argc, char **argv)
 		Widget *Dim = new Widget(w);
 		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
 
-		CheckBox *cb1 = new CheckBox(Dim, "2D"); cb1->setChecked(true);
+		CheckBox *cb1 = new CheckBox(Dim, "2D");
+		cb1->setChecked(true); 
 		CheckBox *cb2 = new CheckBox(Dim, "3D");
 	}
 
@@ -643,7 +582,7 @@ int main(int argc, char **argv)
 		b->setFontSize(28);
 		b->setTooltip("Funktion hinzufuegen");
 		b->setCallback([&t] {fctsh = t->value(); fctsh = to_postfix(fctsh); 
-
+		
 		});
 
 	}
@@ -797,9 +736,9 @@ int main(int argc, char **argv)
 
 
 
-
 	return 0;
 }
 
 
 #endif
+
