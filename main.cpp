@@ -55,7 +55,7 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 
 bool wired = true;
 bool moveit = false;
-float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy = 0;
+float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 std::string fctsh="x x * y y * + ";
 
 
@@ -421,12 +421,21 @@ bool display_funktion()
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+	glPushMatrix();
 	if (moveit && diffz!=0 && diffxy!=0) {
-		diffz = diffz * 0.36;
-		diffxy = diffxy * 0.36;
-		glRotatef(diffz, 0, 0, 1);
-		glRotatef(diffxy, -1, 1, 0);
+		//diffz = diffz * 0.36;
+		sumz = sumz + diffz;
+		if (sumz >= 360) { sumz = sumz - 360; };
+		if (sumz <= -360) { sumz = sumz + 360; };
+		//diffxy = diffxy * 0.36;
+		sumxy = sumxy + diffxy;
+		if (sumxy >= 360) { sumxy = sumxy - 360; };
+		if (sumxy <= -360) { sumxy = sumxy + 360; };
+		
+		
 	}
+	glRotatef(sumz, 0, 0, 1);
+	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
 	if (d3d(fctsh)) 
 	{
 		while (x < 2)
@@ -453,13 +462,15 @@ bool display_funktion()
 		}
 		glEnd();
 	}
-	//glPopMatrix();
+
 	{glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBegin(GL_LINES);
 	glVertex3f(-100, 0, 0); glVertex3f(100, 0, 0);
 	glVertex3f(0, -100, 0); glVertex3f(0, 100, 0);
 	glVertex3f(0, 0, -100); glVertex3f(0, 0, 100);
 	glEnd(); }
+
+	glPopMatrix();
 	return true;
 }
 
