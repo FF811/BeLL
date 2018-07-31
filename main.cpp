@@ -39,6 +39,7 @@ nanogui::CheckBox *cb1 = nullptr;
 nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
+nanogui::Slider *zoomslide = nullptr;
 
 static bool bval = false;
 static std::string strval = "oink!";
@@ -54,8 +55,9 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 }
 
 bool wired = true;
-bool moveit = false;
+bool moveit,moveitreally = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
+float poscam = 11;
 std::string fctsh="x x * y y * + ";
 
 
@@ -97,6 +99,16 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 	{
 		wired=false;
 	}
+	if (key == GLFW_KEY_UP && action == GLFW_RELEASE)
+	{
+		if (poscam > 1) { poscam--; }
+		zoomslide->setValue((poscam - 1) / 20);
+	}
+	if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
+	{
+		if (poscam < 21) { poscam++; }
+		zoomslide->setValue((poscam-1)/20);
+	}
 	screen->keyCallbackEvent(key, scancode, action, mods);
 
 
@@ -117,7 +129,9 @@ static void callback_MouseButton(GLFWwindow *win, int button, int action, int mo
 		}
 	}
 	screen->mouseButtonCallbackEvent(button, action, mods);
+	//std::cout << button << "    " << action << std::endl;
 }
+
 
 /* This function is registered as the mouse move  callback for GLFW, so GLFW
 * will call this during glfwPollEvents() whenever the cursor is moved. */
@@ -127,6 +141,7 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 	screen->cursorPosCallbackEvent(x, y);
 	diffxy = y - counterxy;
 	diffz = x - counterz;
+	if (diffz > 0 || diffxy > 0) { moveitreally = true; } 
 	counterxy = y;
 	counterz = x;
 	//std::cout << diffz << "     " <<moveit<< std::endl;
@@ -422,7 +437,8 @@ bool display_funktion()
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	glPushMatrix();
-	if (moveit && diffz!=0 && diffxy!=0) {
+	glLineWidth(1.0);
+	if (moveit && moveitreally) {
 		//diffz = diffz * 0.36;
 		sumz = sumz + diffz;
 		if (sumz >= 360) { sumz = sumz - 360; };
@@ -464,13 +480,23 @@ bool display_funktion()
 	}
 
 	{glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glLineWidth(2.0);
 	glBegin(GL_LINES);
-	glVertex3f(-100, 0, 0); glVertex3f(100, 0, 0);
-	glVertex3f(0, -100, 0); glVertex3f(0, 100, 0);
-	glVertex3f(0, 0, -100); glVertex3f(0, 0, 100);
+	glColor3f(0, 1, 0);
+	glVertex3f(-10, 0, 0); glVertex3f(10, 0, 0);
+	glColor3f(1, 0, 0);
+	glVertex3f(0, -10, 0); glVertex3f(0, 10, 0);
+	glColor3f(0, 0, 1);
+	glVertex3f(0, 0, -10); glVertex3f(0, 0, 10);
 	glEnd(); }
 
 	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glm::mat4 m = glm::lookAt(vec3(poscam, poscam, poscam), vec3(0, 0, 0), vec3(0, 0, 1));
+
+	glLoadIdentity();
+	glLoadMatrixf(glm::value_ptr(m));
+
 	return true;
 }
 
@@ -630,18 +656,24 @@ int main(int argc, char **argv)
 		reset->setSize(Vector2i(50, 50));
 		reset->setTextColor(Color(142, 69, 188, 255));
 		
-			Button *zoomout = new Button(chgr, "-");
-			zoomout->setFixedSize(Vector2i(20, 20));
-			zoomout->setFontSize(18);
-			zoomout->setTooltip("Rauszoomen");
-
-			Slider *zoomslide = new Slider(chgr);
-			zoomslide->setFixedWidth(169);
-
 			Button *zoomin = new Button(chgr, "+");
 			zoomin->setFixedSize(Vector2i(20, 20));
 			zoomin->setFontSize(18);
 			zoomin->setTooltip("Reinzoomen");
+			zoomin->setCallback([] {if (poscam > 1) { poscam--; }
+			zoomslide->setValue((poscam - 1) / 20); });
+
+			zoomslide = new Slider(chgr);
+			zoomslide->setFixedWidth(169);
+			zoomslide->setValue(0.5);
+			zoomslide->setCallback([](float value){ poscam = (20 * value)+1; std::cout << value << std::endl; });
+			
+			Button *zoomout = new Button(chgr, "-");
+			zoomout->setFixedSize(Vector2i(20, 20));
+			zoomout->setFontSize(18);
+			zoomout->setTooltip("Rauszoomen");
+			zoomout->setCallback([] {if (poscam < 21) { poscam++; }
+			zoomslide->setValue((poscam - 1) / 20); });
 
 
 #endif
@@ -680,7 +712,7 @@ int main(int argc, char **argv)
 
 	// set up example model view matrix
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(10,8,16), vec3(0, 0, 0), vec3(0, 0, 1));
+	glm::mat4 m = glm::lookAt(vec3(poscam,poscam,poscam), vec3(0, 0, 0), vec3(0, 0, 1));
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
