@@ -568,7 +568,9 @@ bool display_funktion()
 	return true;
 }
 
-
+/****************************************************************************
+stupid functions of the program
+*****************************************************************************/
 
 
 /****************************************************************************
@@ -607,7 +609,8 @@ int main(int argc, char **argv)
 		Widget *Dim = new Widget(w);
 		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
 
-		CheckBox *cb1 = new CheckBox(Dim, "2D"); cb1->setChecked(true);
+		CheckBox *cb1 = new CheckBox(Dim, "2D");
+		cb1->setChecked(true); 
 		CheckBox *cb2 = new CheckBox(Dim, "3D");
 	}
 
@@ -643,7 +646,7 @@ int main(int argc, char **argv)
 		b->setFontSize(28);
 		b->setTooltip("Funktion hinzufuegen");
 		b->setCallback([&t] {fctsh = t->value(); fctsh = to_postfix(fctsh); 
-
+		
 		});
 
 	}
@@ -797,9 +800,9 @@ int main(int argc, char **argv)
 
 
 
-
 	return 0;
 }
 
 
 #endif
+
