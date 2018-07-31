@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stack>
+#include <fstream>
 
 
 // GLM provides matries and vectors
@@ -472,52 +473,8 @@ void draw_cube(int red, int green, int blue)
 bool display_funktion()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	/*if (cube)
-	{
-		glPushMatrix();
-		glTranslatef(-0.5, -0.5, -0.5);
-		draw_cube(0, 1, 0);
-		glPopMatrix();
-	}
-	else
-	{
-		glColor3f(1, 1, 0);
-
-		glMaterialf(GL_FRONT, GL_SHININESS, 120);
-		float specReflection[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-		glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
-
-		gluSphere(quadric, 0.5, 128, 64);
-
-
-		glColor3f(1, 1, 1);
-
-		glPushMatrix();
-		glRotatef(alpha, 0, 1, 1);
-		glTranslatef(1, 0, 0);
-		glRotatef(alpha, 0, 1, 0);
-		gluSphere(quadric, 0.2, 128, 64);
-
-		glPushMatrix();
-
-		glColor3f(0.2, 1, 0);
-		glRotatef(beta, 0, 0, 1);
-		glTranslatef(0.5, 0, 0);
-		gluSphere(quadric, 0.1, 32, 16);
-
-
-		glPopMatrix();
-		glPopMatrix();
-		++alpha;
-		beta = beta + 2;
-	};*/
-
-
 	float x = -2;
 	float y = -2;
-	
-	
 	
 	glColor3f(0, 0, 0);
 
@@ -555,20 +512,6 @@ bool display_funktion()
 	glVertex3f(0, 0, -100); glVertex3f(0, 0, 100);
 	glEnd();
 
-	/*
-	glBegin(GL_LINE_STRIP);
-	glColor3f(1, 0, 1);
-	glVertex3f(0, 0, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(0, 0, 1);
-
-	glColor3f(1, 1, 1);
-	glVertex3f(0, 1, 0);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 1, 1);
-
-	glEnd();
-	*/
 	return true;
 }
 
@@ -655,10 +598,10 @@ int main(int argc, char **argv)
 		bfsupp[functionnumber]->setChecked(true);
 		
 		
-		if (functionnumber < 10) {
+		if (functionnumber < 9) {
 			functionnumber++;
 		}
-		else functionnumber = 10;
+		else functionnumber = 9;
 		});
 
 	}
@@ -744,21 +687,46 @@ int main(int argc, char **argv)
 		});
 
 
-
+		using namespace std;
 		//Button für speichern
 		Button *save = new Button(w, "Markierte speichern");
 		save->setFixedSize(Vector2i(180, 20));
 		save->setTextColor(Color(0, 255, 0, 200));
 		save->setFontSize(18);
 		save->setTooltip("Speichert alle markierten Funktionen");
-
+		save->setCallback([] {fstream f;
+		f.open("saved.dat", ios::out);
+		for (int i = 0; i < 10; i++)
+		if (bf[i]->caption() != "Funktion?")
+		f << bf[i]->caption() << endl;
+		f.close();	
+		});
 		//Button für Laden
+		using namespace std;
 		Button *load = new Button(w, "Gespeicherte laden");
 		load->setFixedSize(Vector2i(180, 20));
 		load->setFontSize(18);
 		load->setTextColor(Color(14, 14, 130, 250));
 		load->setTooltip("Oeffnet schon gespeicherte Funktionen");
+		load->setCallback([] {ifstream f; 
+		int r=-1;
+		string s;
+		f.open("saved.dat", ios::in); 
+		while (!f.eof())
+		{
+			r++;
+			getline(f, s);
+			if (s != "")
+			{
+				bf[r]->setCaption(s);
+				bf[r]->setEnabled(true);
+				bfsupp[r]->setEnabled(true);
 
+			}
+			
+		}
+		f.close();
+		});
 
 	}
 
@@ -800,7 +768,7 @@ int main(int argc, char **argv)
 			zoomin->setFixedSize(Vector2i(20, 20));
 			zoomin->setFontSize(18);
 			zoomin->setTooltip("Reinzoomen");
-
+			//zoomin->setCallback([] {cout << glfwGetCursorPos << endl; });
 
 #endif
 	screen->setVisible(true);
