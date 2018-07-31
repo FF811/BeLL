@@ -216,6 +216,7 @@ GLUquadric* quadric;
 float alpha = 0;
 float beta = 0;
 
+
 /******************************************************************************
 Funktionskram
 *****************************************************************************/
@@ -470,7 +471,6 @@ void draw_cube(int red, int green, int blue)
 // main display function. this will be called once per frame.
 bool display_funktion()
 {
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	/*if (cube)
@@ -631,11 +631,10 @@ int main(int argc, char **argv)
 		TextBox *t = new TextBox(Eingabe);
 		t->setEditable(true);
 		t->setFixedSize(Vector2i(110, 20));
-		t->setValue("x^27");
+		t->setValue("x^3");
 		t->setFontSize(20);
 		t->setTooltip("Funktion eingeben");
-		//t->setCallback( [] {btnaddcallback(); });
-		//t->setCallback([&]{t->setValue(""); });
+		
 
 		//Button neben Textfeld
 		Button *a = new Button(Eingabe, "~");
@@ -654,7 +653,12 @@ int main(int argc, char **argv)
 		bf[functionnumber]->setEnabled(true);
 		bfsupp[functionnumber]->setEnabled(true);
 		bfsupp[functionnumber]->setChecked(true);
-		functionnumber++;
+		
+		
+		if (functionnumber < 10) {
+			functionnumber++;
+		}
+		else functionnumber = 10;
 		});
 
 	}
@@ -703,6 +707,12 @@ int main(int argc, char **argv)
 		mark->setFixedSize(Vector2i(180, 20));
 		mark->setFontSize(18);
 		mark->setTooltip("Alle bisher hinzugefuegten Funktionen markieren");
+		mark->setCallback([] {for (int i = 0; i < 10; i++)
+			if (bfsupp[i]->enabled()) {
+				bfsupp[i]->setChecked(true);
+			}
+		});
+
 
 		//Button für löschen
 		Button *destroy = new Button(w, "Markierte loeschen");
@@ -710,6 +720,30 @@ int main(int argc, char **argv)
 		destroy->setTextColor(Color(255, 0, 0, 200));
 		destroy->setFontSize(18);
 		destroy->setTooltip("Loescht alle markierten Funktionen unwiederruflich");
+		destroy->setCallback([] {int x=0;
+			for (int i = 0; i < 10; i++)
+				if (bfsupp[i]->checked()) {
+					bfsupp[i]->setChecked(false);
+					bfsupp[i]->setEnabled(false);
+					bf[i]->setEnabled(false);
+					bf[i]->setCaption("Funktion?");
+					if (functionnumber > 0) functionnumber--;
+				}
+			for (int i = 0; i < 10; i++)
+			if (!bfsupp[i]->enabled()) 
+				x++;
+			else if(x>0) {
+			bf[i-x]->setEnabled(true);
+			bf[i-x]->setCaption(bf[i]->caption());
+			bfsupp[i]->setEnabled(false);
+			bfsupp[i-x]->setEnabled(true); 
+			bfsupp[i - x]->setChecked(true);
+			bf[i]->setCaption("Funktion?");
+			bf[i]->setEnabled(false);
+			}
+		});
+
+
 
 		//Button für speichern
 		Button *save = new Button(w, "Markierte speichern");
