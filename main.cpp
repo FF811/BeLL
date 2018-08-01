@@ -65,8 +65,8 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 	screen->resizeCallbackEvent(wi, h);
 	height = h;
 	width = wi;
-	w3->setPosition(Eigen::Vector2i(10, height - 70));
-	w->setPosition(Eigen::Vector2i(width - 210, 10));
+	w3->setPosition(Eigen::Vector2i(220, height - 70));
+	w->setPosition(Eigen::Vector2i(10, 10));
 	w2->setPosition(Eigen::Vector2i(15, 88));
 }
 
@@ -143,7 +143,12 @@ static void callback_MouseButton(GLFWwindow *win, int button, int action, int mo
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT)
 	{
-		moveit = true;
+		double xpos, ypos;
+		glfwGetCursorPos(win, &xpos, &ypos);
+		if (xpos > 210 && ypos < height - 70)
+		{
+			moveit = true;
+		}
 		if (action == GLFW_RELEASE)
 		{
 			moveit = false;
