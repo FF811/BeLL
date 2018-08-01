@@ -41,14 +41,17 @@ nanogui::CheckBox *cb1 = nullptr;
 nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
-
 nanogui::Slider *zoomslide = nullptr;
 int width, height;
-nanogui::Button *bf[10] = { nullptr };
-nanogui::CheckBox *bfsupp[10] = { nullptr };
+nanogui::Button *bf[9] = { nullptr };
+nanogui::CheckBox *bfsupp[9] = { nullptr };
 nanogui::Button *b = nullptr;
 int functionnumber = 0;
-
+bool wired = true;
+bool moveit,moveitreally = false;
+float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
+float distanz = 11;
+std::string fctsh = "x x * y y * + ";
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -67,11 +70,7 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 	w2->setPosition(Eigen::Vector2i(15, 88));
 }
 
-bool wired = true;
-bool moveit,moveitreally = false;
-float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
-float poscam = 11;
-std::string fctsh="x x * y y * + ";
+
 
 
 /* This function is registered as the keyboard callback for GLFW, so GLFW
@@ -114,17 +113,26 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 	}
 	if (key == GLFW_KEY_UP && action == GLFW_RELEASE)
 	{
-		if (poscam > 1) { poscam--; }
-		zoomslide->setValue((poscam - 1) / 20);
+		if (distanz > 1) { distanz--; }
+		zoomslide->setValue((distanz - 1) / 20);
 	}
 	if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
 	{
-		if (poscam < 21) { poscam++; }
-		zoomslide->setValue((poscam-1)/20);
+		if (distanz < 21) { distanz++; }
+		zoomslide->setValue((distanz -1)/20);
 	}
 	screen->keyCallbackEvent(key, scancode, action, mods);
 
 
+}
+
+static void callback_mousewheel(GLFWwindow *win, double xoffset, double yoffset)
+{
+	//std::cout << xoffset << "    " << yoffset << std::endl;
+	distanz = distanz - yoffset;
+	if (distanz > 21) { distanz = 21; }
+	if (distanz < 1) { distanz = 1; }
+	zoomslide->setValue((distanz - 1) / 20);
 }
 
 /* This function is registered as the mouse button callback for GLFW, so GLFW
@@ -208,6 +216,7 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 		screen->charCallbackEvent(codepoint);
 	}
 	);
+	glfwSetScrollCallback(win, callback_mousewheel);
 
 
 	/* make the context the current context (of the current thread) */
@@ -256,18 +265,20 @@ bool display_funktion()
 		
 		
 	}
+	
 	glRotatef(sumz, 0, 0, 1);
 	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
-	drawfunction(fctsh, 2);
-	drawcoordinates(2);
+	//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
+	drawfunction(fctsh, distanz);
+	drawcoordinates(distanz);
 
 	glPopMatrix();
+
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(poscam, poscam, poscam), vec3(0, 0, 0), vec3(0, 0, 1));
+	glm::mat4 m = glm::lookAt(vec3(distanz,distanz,distanz), vec3(0, 0, 0), vec3(0, 0, 1));
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
-
 
 
 	return true;
@@ -522,20 +533,20 @@ int main(int argc, char **argv)
 			zoomin->setFontSize(18);
 			zoomin->setTooltip("Reinzoomen");
 
-			zoomin->setCallback([] {if (poscam > 1) { poscam--; }
-			zoomslide->setValue((poscam - 1) / 20); });
+			zoomin->setCallback([] {if (distanz > 1) { distanz--; }
+			zoomslide->setValue((distanz - 1) / 20); });
 
 			zoomslide = new Slider(chgr);
 			zoomslide->setFixedWidth(169);
 			zoomslide->setValue(0.5);
-			zoomslide->setCallback([](float value){ poscam = (20 * value)+1; std::cout << value << std::endl; });
+			zoomslide->setCallback([](float value){ distanz = (20 * value)+1; std::cout << value << std::endl; });
 			
 			Button *zoomout = new Button(chgr, "-");
 			zoomout->setFixedSize(Vector2i(20, 20));
 			zoomout->setFontSize(18);
 			zoomout->setTooltip("Rauszoomen");
-			zoomout->setCallback([] {if (poscam < 21) { poscam++; }
-			zoomslide->setValue((poscam - 1) / 20); });
+			zoomout->setCallback([] {if (distanz < 21) { distanz++; }
+			zoomslide->setValue((distanz - 1) / 20); });
 
 #endif
 	screen->setVisible(true);
@@ -573,7 +584,7 @@ int main(int argc, char **argv)
 
 	// set up example model view matrix
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(poscam,poscam,poscam), vec3(0, 0, 0), vec3(0, 0, 1));
+	glm::mat4 m = glm::lookAt(vec3(1,1,1), vec3(0, 0, 0), vec3(0, 0, 1));
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
