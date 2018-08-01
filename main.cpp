@@ -23,6 +23,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "functions.h"
+#include "draw.h"
 #include <Eigen/Core>
 using namespace glm;
 
@@ -236,8 +237,6 @@ bool display_funktion()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	float x = -2;
-	float y = -2;
 	
 	glColor3f(0, 0, 0);
 
@@ -259,7 +258,9 @@ bool display_funktion()
 	}
 	glRotatef(sumz, 0, 0, 1);
 	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
-	if (d3d(fctsh)) 
+	drawfunction(fctsh, 2);
+	drawcoordinates(2);
+	/*if (d3d(fctsh)) 
 	{
 		while (x < 2)
 		{	
@@ -296,7 +297,7 @@ bool display_funktion()
 	glVertex3f(0, -10, 0); glVertex3f(0, 10, 0);
 	glColor3f(0, 0, 1);
 	glVertex3f(0, 0, -10); glVertex3f(0, 0, 10);
-	glEnd(); }
+	glEnd(); }*/
 
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
