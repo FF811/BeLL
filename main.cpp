@@ -40,7 +40,7 @@ nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
 nanogui::Slider *zoomslide = nullptr;
-
+int width, height;
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -52,6 +52,11 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 	glViewport(0, 0, wi, h);
 	printf("new framebuffer size izz da: %dx%d pixels\n", wi, h);
 	screen->resizeCallbackEvent(wi, h);
+	height = h;
+	width = wi;
+	w3->setPosition(Eigen::Vector2i(10, height - 70));
+	w->setPosition(Eigen::Vector2i(width - 210, 10));
+	w2->setPosition(Eigen::Vector2i(15, 88));
 }
 
 bool wired = true;
@@ -139,14 +144,14 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 {
 	void* user_pointer = glfwGetWindowUserPointer(win);
 	screen->cursorPosCallbackEvent(x, y);
-	diffxy = y - counterxy;
-	diffz = x - counterz;
-	if (diffz > 0 || diffxy > 0) { moveitreally = true; } 
+		diffxy = y - counterxy;
+		diffz = x - counterz;
+		if (diffz > 0 || diffxy > 0) { moveitreally = true; } 
 	counterxy = y;
 	counterz = x;
 	//std::cout << diffz << "     " <<moveit<< std::endl;
-	w->setPosition(Eigen::Vector2i(870, 10));
-	w3->setPosition(Eigen::Vector2i(10, 650));
+	w->setPosition(Eigen::Vector2i(width - 210, 10));
+	w3->setPosition(Eigen::Vector2i(10, height - 70));
 	w2->setPosition(Eigen::Vector2i(15, 88));
 }
 
@@ -512,7 +517,8 @@ stupid functions of the program
 
 int main(int argc, char **argv)
 {
-	GLFWwindow *win = open_window(1080, 720);
+	width = 1080; height = 720;
+	GLFWwindow *win = open_window(width, height);
 	// Create a nanogui screen and pass the glfw pointer to initialize 
 	screen = new nanogui::Screen();
 	screen->initialize(win, false);
@@ -528,7 +534,7 @@ int main(int argc, char **argv)
 #if 1
 	w = new nanogui::Window(screen, "");
 	w->setFixedSize(Vector2i(200, 700));
-	w->setPosition(Vector2i(870, 10));
+	w->setPosition(Vector2i(width-210, 10));
 	w->setLayout(new GroupLayout());
 
 
@@ -637,7 +643,7 @@ int main(int argc, char **argv)
 #if 1
 	w3 = new nanogui::Window(screen, "");
 	w3->setFixedSize(Vector2i(850, 60));
-	w3->setPosition(Vector2i(10, 650));
+	w3->setPosition(Vector2i(10, height-70));
 	w3->setLayout(new GroupLayout());
 	//Label unten
 	new Label(w3, "", "sans-bold");
