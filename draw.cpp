@@ -13,7 +13,7 @@ void drawfunction(std::string fctsh, int scale)
 
 	float x = -scale;
 	float y = -scale;
-	float value;
+	float resolution = 0.4;
 	if (d3d(fctsh))
 
 	{
@@ -22,26 +22,26 @@ void drawfunction(std::string fctsh, int scale)
 			glBegin(GL_TRIANGLE_STRIP);
 			y = -scale;
 			while (y < scale) {
-				value = to_value(fctsh, x, y, true);
-				if (value<scale && value>-scale)
-				{
-					glVertex3f(x, y, value);
-					glVertex3f(x + scale / 20 ,y, to_value(fctsh, x + scale / 20, y, true));
-					y = y + scale/20;
-				}
+				
+			
+				
+					glVertex3f(x, y, to_value(fctsh, x, y, true));
+					glVertex3f(x + resolution,y, to_value(fctsh, x + resolution, y, true));
+					y = y + resolution;
+				
 				
 			}
-			x = x + scale / 20;
+			x = x + resolution;
 			glEnd();
 		}
 	}
 	else {
 		glBegin(GL_LINE_STRIP);
-		while (x < 2)
+		while (x < scale)
 		{
 
 			glVertex3f(x, to_value(fctsh, x, y, false), 0);
-			x = x + 0.05;
+			x = x + resolution;
 
 		}
 		glEnd();

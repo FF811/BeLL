@@ -43,15 +43,15 @@ nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
 nanogui::Slider *zoomslide = nullptr;
 int width, height;
-nanogui::Button *bf[9] = { nullptr };
-nanogui::CheckBox *bfsupp[9] = { nullptr };
+nanogui::Button *bf[10] = { nullptr };
+nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
 int functionnumber = 0;
 bool wired = true;
 bool moveit,moveitreally = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz = 11;
-std::string fctsh = "x x * y y * + ";
+std::string fctsh[10] = { "x x * y + "};
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -269,7 +269,7 @@ bool display_funktion()
 	glRotatef(sumz, 0, 0, 1);
 	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
 	//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
-	drawfunction(fctsh, distanz);
+	for (int i = 0; i < functionnumber; i++) { if (bfsupp[i]->checked()) { drawfunction(fctsh[i], distanz); } };
 	drawcoordinates(distanz);
 
 	glPopMatrix();
@@ -361,18 +361,22 @@ int main(int argc, char **argv)
 		b->setFixedSize(Vector2i(20, 20));
 		b->setFontSize(28);
 		b->setTooltip("Funktion hinzufuegen");
-		b->setCallback([&t] {fctsh = t->value(); fctsh = to_postfix(fctsh); 
-
+		b->setCallback([&t] {
+			
+		
+			
+		fctsh[functionnumber] = t->value(); fctsh[functionnumber] = to_postfix(fctsh[functionnumber]);
 		bf[functionnumber]->setCaption(t->value());
 		bf[functionnumber]->setEnabled(true);
 		bfsupp[functionnumber]->setEnabled(true);
 		bfsupp[functionnumber]->setChecked(true);
 		
-		
 		if (functionnumber < 9) {
 			functionnumber++;
 		}
 		else functionnumber = 9;
+		
+		
 
 		});
 
@@ -442,6 +446,7 @@ int main(int argc, char **argv)
 					bfsupp[i]->setEnabled(false);
 					bf[i]->setEnabled(false);
 					bf[i]->setCaption("Funktion?");
+					fctsh[i] = "0";
 					if (functionnumber > 0) functionnumber--;
 				}
 			for (int i = 0; i < 10; i++)
@@ -453,6 +458,8 @@ int main(int argc, char **argv)
 			bfsupp[i]->setEnabled(false);
 			bfsupp[i-x]->setEnabled(true); 
 			bfsupp[i - x]->setChecked(true);
+			fctsh[i - x] = fctsh[i];
+			fctsh[i] = "0";
 			bf[i]->setCaption("Funktion?");
 			bf[i]->setEnabled(false);
 			}
@@ -468,6 +475,7 @@ int main(int argc, char **argv)
 		save->setTooltip("Speichert alle markierten Funktionen");
 		save->setCallback([] {fstream f;
 		f.open("saved.dat", ios::out);
+		f << functionnumber << endl;
 		for (int i = 0; i < 10; i++)
 		if (bf[i]->caption() != "Funktion?")
 		f << bf[i]->caption() << endl;
@@ -484,6 +492,8 @@ int main(int argc, char **argv)
 		int r=-1;
 		string s;
 		f.open("saved.dat", ios::in); 
+		getline(f, s);
+		functionnumber = stoi(s);
 		while (!f.eof())
 		{
 			r++;
@@ -491,6 +501,7 @@ int main(int argc, char **argv)
 			if (s != "")
 			{
 				bf[r]->setCaption(s);
+				fctsh[r] = s;
 				bf[r]->setEnabled(true);
 				bfsupp[r]->setEnabled(true);
 
