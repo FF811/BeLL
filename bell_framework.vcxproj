@@ -307,6 +307,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="functions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="nanogui\include\nanovg.c" />
@@ -342,6 +343,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="nanogui\src\darwin.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="functions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
