@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stack>
+#include <fstream>
 
 
 // GLM provides matries and vectors
@@ -39,8 +40,14 @@ nanogui::CheckBox *cb1 = nullptr;
 nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
+
 nanogui::Slider *zoomslide = nullptr;
 int width, height;
+nanogui::Button *bf[10] = { nullptr };
+nanogui::CheckBox *bfsupp[10] = { nullptr };
+nanogui::Button *b = nullptr;
+int functionnumber = 0;
+
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -220,6 +227,7 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 GLUquadric* quadric;
 float alpha = 0;
 float beta = 0;
+
 
 /******************************************************************************
 Funktionskram
@@ -431,7 +439,6 @@ float to_value(string post, float x, float y, bool d)
 // main display function. this will be called once per frame.
 bool display_funktion()
 {
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	float x = -2;
@@ -487,6 +494,7 @@ bool display_funktion()
 	{glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glLineWidth(2.0);
 	glBegin(GL_LINES);
+
 	glColor3f(0, 1, 0);
 	glVertex3f(-10, 0, 0); glVertex3f(10, 0, 0);
 	glColor3f(1, 0, 0);
@@ -501,6 +509,8 @@ bool display_funktion()
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
+
+
 
 	return true;
 }
@@ -565,26 +575,36 @@ int main(int argc, char **argv)
 		TextBox *t = new TextBox(Eingabe);
 		t->setEditable(true);
 		t->setFixedSize(Vector2i(110, 20));
-		t->setValue("x x *");
+		t->setValue("x^3");
 		t->setFontSize(20);
 		t->setTooltip("Funktion eingeben");
-		//t->setCallback( [] {btnaddcallback(); });
-		//t->setCallback([&]{t->setValue(""); });
+		
 
 		//Button neben Textfeld
 		Button *a = new Button(Eingabe, "~");
 		a->setFixedSize(Vector2i(20, 20));
 		a->setFontSize(28);
 		a->setTooltip("Vorlagen");
-	
-
+		
+		
 		//add Button
-		Button *b = new Button(Eingabe, "+");
+		b = new Button(Eingabe, "+");
 		b->setFixedSize(Vector2i(20, 20));
 		b->setFontSize(28);
 		b->setTooltip("Funktion hinzufuegen");
 		b->setCallback([&t] {fctsh = t->value(); fctsh = to_postfix(fctsh); 
+
+		bf[functionnumber]->setCaption(t->value());
+		bf[functionnumber]->setEnabled(true);
+		bfsupp[functionnumber]->setEnabled(true);
+		bfsupp[functionnumber]->setChecked(true);
 		
+		
+		if (functionnumber < 9) {
+			functionnumber++;
+		}
+		else functionnumber = 9;
+
 		});
 
 	}
@@ -600,8 +620,30 @@ int main(int argc, char **argv)
 		w2->setFixedSize(Vector2i(180, 300));
 		w2->setLayout(new GroupLayout());	
 		
-	
 	}
+	
+
+	
+	//Button for fnct 
+
+
+	for (int i = 0; i < 10; i++)
+	{
+		Widget *Eingabe = new Widget(w2);
+		Eingabe->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
+		bf[i] = new Button(Eingabe, "Funktion?");
+		bf[i]->setFixedSize(Vector2i(120, 20));
+		bf[i]->setVisible(true);
+		bf[i]->setEnabled(false);
+		bf[i]->setFontSize(15);
+		bfsupp[i] = new CheckBox(Eingabe, "~");
+		bfsupp[i]->setFixedSize(Vector2i(20, 20));
+		bfsupp[i]->setVisible(true);
+		bfsupp[i]->setEnabled(false);
+		bfsupp[i]->setFontSize(15);
+	}	
+
+		
 	/*************************************
 	Label für Funktionsbearbeitungsbuttons
 	*************************************/
@@ -611,6 +653,12 @@ int main(int argc, char **argv)
 		mark->setFixedSize(Vector2i(180, 20));
 		mark->setFontSize(18);
 		mark->setTooltip("Alle bisher hinzugefuegten Funktionen markieren");
+		mark->setCallback([] {for (int i = 0; i < 10; i++)
+			if (bfsupp[i]->enabled()) {
+				bfsupp[i]->setChecked(true);
+			}
+		});
+
 
 		//Button für löschen
 		Button *destroy = new Button(w, "Markierte loeschen");
@@ -618,21 +666,70 @@ int main(int argc, char **argv)
 		destroy->setTextColor(Color(255, 0, 0, 200));
 		destroy->setFontSize(18);
 		destroy->setTooltip("Loescht alle markierten Funktionen unwiederruflich");
+		destroy->setCallback([] {int x=0;
+			for (int i = 0; i < 10; i++)
+				if (bfsupp[i]->checked()) {
+					bfsupp[i]->setChecked(false);
+					bfsupp[i]->setEnabled(false);
+					bf[i]->setEnabled(false);
+					bf[i]->setCaption("Funktion?");
+					if (functionnumber > 0) functionnumber--;
+				}
+			for (int i = 0; i < 10; i++)
+			if (!bfsupp[i]->enabled()) 
+				x++;
+			else if(x>0) {
+			bf[i-x]->setEnabled(true);
+			bf[i-x]->setCaption(bf[i]->caption());
+			bfsupp[i]->setEnabled(false);
+			bfsupp[i-x]->setEnabled(true); 
+			bfsupp[i - x]->setChecked(true);
+			bf[i]->setCaption("Funktion?");
+			bf[i]->setEnabled(false);
+			}
+		});
 
+
+		using namespace std;
 		//Button für speichern
 		Button *save = new Button(w, "Markierte speichern");
 		save->setFixedSize(Vector2i(180, 20));
 		save->setTextColor(Color(0, 255, 0, 200));
 		save->setFontSize(18);
 		save->setTooltip("Speichert alle markierten Funktionen");
-
+		save->setCallback([] {fstream f;
+		f.open("saved.dat", ios::out);
+		for (int i = 0; i < 10; i++)
+		if (bf[i]->caption() != "Funktion?")
+		f << bf[i]->caption() << endl;
+		f.close();	
+		});
 		//Button für Laden
+		using namespace std;
 		Button *load = new Button(w, "Gespeicherte laden");
 		load->setFixedSize(Vector2i(180, 20));
 		load->setFontSize(18);
 		load->setTextColor(Color(14, 14, 130, 250));
 		load->setTooltip("Oeffnet schon gespeicherte Funktionen");
+		load->setCallback([] {ifstream f; 
+		int r=-1;
+		string s;
+		f.open("saved.dat", ios::in); 
+		while (!f.eof())
+		{
+			r++;
+			getline(f, s);
+			if (s != "")
+			{
+				bf[r]->setCaption(s);
+				bf[r]->setEnabled(true);
+				bfsupp[r]->setEnabled(true);
 
+			}
+			
+		}
+		f.close();
+		});
 
 	}
 
@@ -666,6 +763,7 @@ int main(int argc, char **argv)
 			zoomin->setFixedSize(Vector2i(20, 20));
 			zoomin->setFontSize(18);
 			zoomin->setTooltip("Reinzoomen");
+
 			zoomin->setCallback([] {if (poscam > 1) { poscam--; }
 			zoomslide->setValue((poscam - 1) / 20); });
 
@@ -680,7 +778,6 @@ int main(int argc, char **argv)
 			zoomout->setTooltip("Rauszoomen");
 			zoomout->setCallback([] {if (poscam < 21) { poscam++; }
 			zoomslide->setValue((poscam - 1) / 20); });
-
 
 #endif
 	screen->setVisible(true);
