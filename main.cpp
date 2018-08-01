@@ -41,10 +41,12 @@ nanogui::CheckBox *cb1 = nullptr;
 nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
-
+nanogui::Widget *fun[10] = { nullptr };
+nanogui::Button *h[10] = { nullptr };
+nanogui::Popup *popup[10] = { nullptr };
 nanogui::Slider *zoomslide = nullptr;
 int width, height;
-nanogui::Button *bf[10] = { nullptr };
+nanogui::PopupButton *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
 int functionnumber = 0;
@@ -158,8 +160,8 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 	counterxy = y;
 	counterz = x;
 	//std::cout << diffz << "     " <<moveit<< std::endl;
-	w->setPosition(Eigen::Vector2i(width - 210, 10));
-	w3->setPosition(Eigen::Vector2i(10, height - 70));
+	w->setPosition(Eigen::Vector2i(10, 10));
+	w3->setPosition(Eigen::Vector2i(220, height - 70));
 	w2->setPosition(Eigen::Vector2i(15, 88));
 }
 
@@ -302,7 +304,7 @@ int main(int argc, char **argv)
 #if 1
 	w = new nanogui::Window(screen, "");
 	w->setFixedSize(Vector2i(200, 700));
-	w->setPosition(Vector2i(width-210, 10));
+	w->setPosition(Vector2i(10, 10));
 	w->setLayout(new GroupLayout());
 
 
@@ -313,11 +315,15 @@ int main(int argc, char **argv)
 	{
 		new Label(w, "", "sans-bold");
 		Widget *Dim = new Widget(w);
-		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
+		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 3));
 
-		CheckBox *cb1 = new CheckBox(Dim, "2D");
-		cb1->setChecked(true); 
-		CheckBox *cb2 = new CheckBox(Dim, "3D");
+		Button *dimension = new Button(Dim, "2D");
+		dimension->setFixedSize(Vector2i(20,20));
+		dimension->setFontSize(18);
+		dimension->setTooltip("Dimension festlegen (2D/3D)");
+		dimension->setBackgroundColor(Color(142, 69, 15, 255));
+		dimension->setCallback([&dimension] {if (dimension->caption() == "2D") dimension->setCaption("3D");
+		else dimension->setCaption("2D"); });
 	}
 
 	/****************
@@ -389,11 +395,16 @@ int main(int argc, char **argv)
 	{
 		Widget *Eingabe = new Widget(w2);
 		Eingabe->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
-		bf[i] = new Button(Eingabe, "Funktion?");
+		bf[i] = new PopupButton(Eingabe, "Funktion?");
 		bf[i]->setFixedSize(Vector2i(120, 20));
 		bf[i]->setVisible(true);
 		bf[i]->setEnabled(false);
 		bf[i]->setFontSize(15);
+
+		/*popup[i]= bf[i]->popup();
+		popup[i]->setSide(popup[i]->Right);
+		popup[i]->setFixedSize(Vector2i(100,200));
+		h[i]->setFixedSize(Vector2i(120,20));*/
 		bfsupp[i] = new CheckBox(Eingabe, "~");
 		bfsupp[i]->setFixedSize(Vector2i(20, 20));
 		bfsupp[i]->setVisible(true);
@@ -498,25 +509,29 @@ int main(int argc, char **argv)
 #if 1
 	w3 = new nanogui::Window(screen, "");
 	w3->setFixedSize(Vector2i(850, 60));
-	w3->setPosition(Vector2i(10, height-70));
+	w3->setPosition(Vector2i(220, height-70));
 	w3->setLayout(new GroupLayout());
 	//Label unten
 	new Label(w3, "", "sans-bold");
 	Widget *chgr = new Widget(w3);
 	chgr->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 69));
 
+	
 		ToolButton *screenshot = new ToolButton (chgr,ENTYPO_ICON_CAMERA);
 		screenshot->setFontSize(20);
 		screenshot->setSize(Vector2i(50, 50));
 		screenshot->setTextColor(Color(12, 100, 130, 255));
 
-			CheckBox *cam = new CheckBox(chgr, "Kamera"); cam->setChecked(true);
-			CheckBox *obj = new CheckBox(chgr, "Objekt");
+		Button *cam_fnct = new Button(chgr, "Funktion bewegen");
+		cam_fnct->setFixedSize(Vector2i(169,25));
+		cam_fnct->setFontSize(20);
+		cam_fnct->setCallback([&cam_fnct] {if (cam_fnct->caption() == "Funktion bewegen") cam_fnct->setCaption("Kamera bewegen"); 
+									else cam_fnct->setCaption("Funktion bewegen"); });
 	
 		ToolButton *reset = new ToolButton(chgr, ENTYPO_ICON_EYE);
 		reset->setSize(Vector2i(50, 50));
 		reset->setTextColor(Color(142, 69, 188, 255));
-		
+	
 			Button *zoomin = new Button(chgr, "+");
 			zoomin->setFixedSize(Vector2i(20, 20));
 			zoomin->setFontSize(18);
@@ -604,4 +619,3 @@ int main(int argc, char **argv)
 
 
 #endif
-
