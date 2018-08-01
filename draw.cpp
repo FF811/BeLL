@@ -11,31 +11,37 @@
 void drawfunction(std::string fctsh, int scale)
 {
 
-	float x = -2;
-	float y = -2;
+	float x = -scale;
+	float y = -scale;
+	float resolution = 0.4;
 	if (d3d(fctsh))
 
 	{
-		while (x < 2)
+		while (x < scale)
 		{
 			glBegin(GL_TRIANGLE_STRIP);
-			y = -2;
-			while (y < 2) {
-				glVertex3f(x, y, to_value(fctsh, x, y, true));
-				glVertex3f(x + 0.4, y, to_value(fctsh, x + 0.4, y, true));
-				y = y + 0.4;
+			y = -scale;
+			while (y < scale) {
+				
+			
+				
+					glVertex3f(x, y, to_value(fctsh, x, y, true));
+					glVertex3f(x + resolution,y, to_value(fctsh, x + resolution, y, true));
+					y = y + resolution;
+				
+				
 			}
-			x = x + 0.4;
+			x = x + resolution;
 			glEnd();
 		}
 	}
 	else {
 		glBegin(GL_LINE_STRIP);
-		while (x < 2)
+		while (x < scale)
 		{
 
 			glVertex3f(x, to_value(fctsh, x, y, false), 0);
-			x = x + 0.05;
+			x = x + resolution;
 
 		}
 		glEnd();
@@ -49,10 +55,10 @@ glLineWidth(2.0);
 glBegin(GL_LINES);
 
 glColor3f(0, 1, 0);
-glVertex3f(-10, 0, 0); glVertex3f(10, 0, 0);
+glVertex3f(-scale, 0, 0); glVertex3f(scale, 0, 0);
 glColor3f(1, 0, 0);
-glVertex3f(0, -10, 0); glVertex3f(0, 10, 0);
+glVertex3f(0, -scale, 0); glVertex3f(0, scale, 0);
 glColor3f(0, 0, 1);
-glVertex3f(0, 0, -10); glVertex3f(0, 0, 10);
+glVertex3f(0, 0, -scale); glVertex3f(0, 0, scale);
 glEnd(); 
 }
