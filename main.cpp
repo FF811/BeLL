@@ -50,11 +50,11 @@ nanogui::PopupButton *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
 int functionnumber = 0;
-bool wired = true;
-bool moveit,moveitreally = false;
+bool wired,makeit3d = true;
+bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz = 11;
-std::string fctsh[10] = { "x x * y + "};
+std::string fctsh[10] = { "0 "};
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -88,7 +88,7 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 		glfwSetWindowShouldClose(win, true);
 	}
 
-	if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
+	/*if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
 	{
 		glClearColor(1, 0, 0, 1);
 	}
@@ -104,7 +104,7 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 	if (key == GLFW_KEY_4 && action == GLFW_RELEASE)
 	{
 		glClearColor(0.4, 0.4, 0.4, 1);
-	}
+	}*/
 
 	if (key == GLFW_KEY_W && action == GLFW_RELEASE)
 	{
@@ -151,6 +151,8 @@ static void callback_MouseButton(GLFWwindow *win, int button, int action, int mo
 		if (xpos > 210 && ypos < height - 70)
 		{
 			moveit = true;
+			diffxy = 0;
+			diffz = 0;
 		}
 		if (action == GLFW_RELEASE)
 		{
@@ -170,7 +172,6 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 	screen->cursorPosCallbackEvent(x, y);
 		diffxy = y - counterxy;
 		diffz = x - counterz;
-		if (diffz > 0 || diffxy > 0) { moveitreally = true; } 
 	counterxy = y;
 	counterz = x;
 	//std::cout << diffz << "     " <<moveit<< std::endl;
@@ -261,7 +262,8 @@ bool display_funktion()
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	glPushMatrix();
 	glLineWidth(1.0);
-	if (moveit && moveitreally) {
+	if (makeit3d)
+	{if (moveit) {
 		//diffz = diffz * 0.36;
 		sumz = sumz + diffz;
 		if (sumz >= 360) { sumz = sumz - 360; };
@@ -276,14 +278,18 @@ bool display_funktion()
 	
 	glRotatef(sumz, 0, 0, 1);
 	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
-	//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
-	for (int i = 0; i < functionnumber; i++) { if (bfsupp[i]->checked()) { drawfunction(fctsh[i], distanz); } };
+	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
+	for (int i = 0; i < functionnumber; i++) { if (bfsupp[i]->checked()) { if (d3d(fctsh[i])==makeit3d)	drawfunction(fctsh[i], distanz); } };
 	drawcoordinates(distanz);
 
 	glPopMatrix();
 
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(distanz,distanz,distanz), vec3(0, 0, 0), vec3(0, 0, 1));
+	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+	if (makeit3d)
+	{
+		m = glm::lookAt(vec3(distanz, distanz, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
+	}
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
@@ -313,7 +319,7 @@ int main(int argc, char **argv)
 	// Create nanogui gui
 	using namespace nanogui;
 	bool enabled = true;
-	glClearColor(1, 0, 0, 1);
+	glClearColor(0.7, 0.7, 0.7, 1);
 
 	/*************
 	Fenster rechts
@@ -334,13 +340,13 @@ int main(int argc, char **argv)
 		Widget *Dim = new Widget(w);
 		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 3));
 
-		Button *dimension = new Button(Dim, "2D");
+		Button *dimension = new Button(Dim, "3D");
 		dimension->setFixedSize(Vector2i(20,20));
 		dimension->setFontSize(18);
 		dimension->setTooltip("Dimension festlegen (2D/3D)");
 		dimension->setBackgroundColor(Color(142, 69, 15, 255));
-		dimension->setCallback([&dimension] {if (dimension->caption() == "2D") dimension->setCaption("3D");
-		else dimension->setCaption("2D"); });
+		dimension->setCallback([&dimension] {if (dimension->caption() == "2D") { dimension->setCaption("3D"); makeit3d = true; }
+		else { dimension->setCaption("2D"); makeit3d = false; } });
 	}
 
 	/****************
@@ -509,12 +515,12 @@ int main(int argc, char **argv)
 		int r=-1;
 		string s;
 		f.open("saved.dat", ios::in); 
-		getline(f, s);
+		std::getline(f, s);
 		functionnumber = stoi(s);
 		while (!f.eof())
 		{
 			r++;
-			getline(f, s);
+			std::getline(f, s);
 			if (s != "")
 			{
 				bf[r]->setCaption(s);
