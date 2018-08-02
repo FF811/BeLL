@@ -55,6 +55,7 @@ bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz = 11;
 std::string fctsh[10] = { "0 "};
+int red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -87,12 +88,7 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 	{
 		glfwSetWindowShouldClose(win, true);
 	}
-
-	/*if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
-	{
-		glClearColor(1, 0, 0, 1);
-	}
-	if (key == GLFW_KEY_2 && action == GLFW_RELEASE)
+	/*if (key == GLFW_KEY_2 && action == GLFW_RELEASE)
 	{
 		glClearColor(0, 1, 0, 1);
 	}
@@ -279,7 +275,12 @@ bool display_funktion()
 	glRotatef(sumz, 0, 0, 1);
 	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
 	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
-	for (int i = 0; i < functionnumber; i++) { if (bfsupp[i]->checked()) { if (d3d(fctsh[i])==makeit3d)	drawfunction(fctsh[i], distanz); } };
+	for (int i = 0; i < functionnumber; i++) 
+		{ if (bfsupp[i]->checked())
+			{ 
+				glColor3f(red[i], green[i], blue[i]); if (d3d(fctsh[i]) == makeit3d)	drawfunction(fctsh[i], distanz); 
+			} 
+		};
 	drawcoordinates(distanz);
 
 	glPopMatrix();
