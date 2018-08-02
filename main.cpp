@@ -43,10 +43,10 @@ nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
 nanogui::Widget *fun[10] = { nullptr };
 nanogui::Button *h[10] = { nullptr };
-nanogui::Popup *popup[10] = { nullptr };
+
 nanogui::Slider *zoomslide = nullptr;
 int width, height;
-nanogui::PopupButton *bf[10] = { nullptr };
+nanogui::Button *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
 int functionnumber = 0;
@@ -422,16 +422,11 @@ int main(int argc, char **argv)
 	{
 		Widget *Eingabe = new Widget(w2);
 		Eingabe->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
-		bf[i] = new PopupButton(Eingabe, "Funktion?");
+		bf[i] = new Button(Eingabe, "Funktion?");
 		bf[i]->setFixedSize(Vector2i(120, 20));
 		bf[i]->setVisible(true);
 		bf[i]->setEnabled(false);
 		bf[i]->setFontSize(15);
-
-		/*popup[i]= bf[i]->popup();
-		popup[i]->setSide(popup[i]->Right);
-		popup[i]->setFixedSize(Vector2i(100,200));
-		h[i]->setFixedSize(Vector2i(120,20));*/
 		bfsupp[i] = new CheckBox(Eingabe, "~");
 		bfsupp[i]->setFixedSize(Vector2i(20, 20));
 		bfsupp[i]->setVisible(true);
