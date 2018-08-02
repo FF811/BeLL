@@ -13,13 +13,11 @@ void drawfunction(std::string fctsh, int scale)
 
 	float x = -scale;
 	float y = -scale;
-	float resolution=0.8;
-	if (scale < 15) resolution = 0.5;
-	if (scale < 10) resolution = 0.3;
-	if (scale < 5) resolution = 0.1;
+	float resolution;
 	if (d3d(fctsh))
 
-	{
+	{	
+		resolution = -x / 20;
 		while (x < scale)
 		{
 			glBegin(GL_TRIANGLE_STRIP);
@@ -40,6 +38,7 @@ void drawfunction(std::string fctsh, int scale)
 	}
 	else {
 		glBegin(GL_LINE_STRIP);
+		resolution = -x / 50;
 		while (x < scale)
 		{
 
