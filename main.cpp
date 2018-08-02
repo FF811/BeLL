@@ -252,6 +252,7 @@ float beta = 0;
 // main display function. this will be called once per frame.
 bool display_funktion()
 {
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	
@@ -371,6 +372,83 @@ int main(int argc, char **argv)
 		a->setFixedSize(Vector2i(20, 20));
 		a->setFontSize(28);
 		a->setTooltip("Vorlagen");
+		a->setCallback([&]
+		{
+			Window *vor = new Window(screen, "Vorlagen");
+			vor->setFixedSize(Vector2i(200, 200));
+			vor->setPosition(Vector2i(220, 10));
+			vor->setLayout(new GroupLayout());
+			vor->setVisible(true);
+			new Label(vor, "", "sans-bold");
+			Widget *widv = new Widget(vor);
+			widv->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 3, 1));
+
+			Button *v1 = new Button(widv, "x^2+y^2");
+			v1->setFixedSize(Vector2i(180, 20));
+			v1->setCallback([&]
+			{
+				bf[0]->setCaption("x^2+y^2");
+				t->setValue("x^2+y^2");
+				fctsh[0] = bf[0]->caption(); fctsh[0] = to_postfix(fctsh[0]);
+				bf[0]->setCaption(bf[0]->caption());
+				bf[0]->setEnabled(true);
+				bfsupp[0]->setEnabled(true);
+				bfsupp[0]->setChecked(true);
+
+				if (functionnumber == 0) {
+					functionnumber++;
+				}
+				
+			}
+			);
+
+			Button *v2 = new Button(widv, "sqrt(x^2+y^2)");
+			v2->setFixedSize(Vector2i(180, 20));
+			v2->setCallback([&]
+			{
+				bf[0]->setCaption("sqrt(x^2+y^2)");
+				t->setValue("sqrt(x^2+y^2)");
+				fctsh[0] = bf[0]->caption(); fctsh[0] = to_postfix(fctsh[0]);
+				bf[0]->setCaption(bf[0]->caption());
+				bf[0]->setEnabled(true);
+				bfsupp[0]->setEnabled(true);
+				bfsupp[0]->setChecked(true);
+
+				if (functionnumber == 0) {
+					functionnumber++;
+				}
+				
+			}
+			);
+
+			Button *v3 = new Button(widv, "sqrt(16-x^2-y^2)");
+			v3->setFixedSize(Vector2i(180, 20));
+			v3->setCallback([&]
+			{
+				bf[0]->setCaption("sqrt(16-x^2-y^2)");
+				t->setValue("sqrt(16-x^2-y^2)");
+				fctsh[0] = bf[0]->caption(); fctsh[0] = to_postfix(fctsh[0]);
+				bf[0]->setCaption(bf[0]->caption());
+				bf[0]->setEnabled(true);
+				bfsupp[0]->setEnabled(true);
+				bfsupp[0]->setChecked(true);
+
+				if (functionnumber == 0) {
+					functionnumber++;
+				}
+				
+			}
+			);
+
+			/*Button *close = new Button(widv, "sqrt(16-x^2-y^2)");
+			close->setFixedSize(Vector2i(180, 20));
+			close->setCallback([&]
+			{
+				vor->dispose();
+			}
+			);
+			screen->performLayout();*/
+		});
 		
 		
 		//add Button
@@ -426,46 +504,54 @@ int main(int argc, char **argv)
 		bf[i]->setVisible(true);
 		bf[i]->setEnabled(false);
 		bf[i]->setFontSize(15);
+		
 		bf[i]->setCallback([&] 
+			
+		{	
+			
 		{
-			winwin = new Window(screen,"Funktion" );
+			winwin = new Window(screen, "Funktion");
 			winwin->setFixedSize(Vector2i(125, 200));
 			winwin->setPosition(Vector2i(220, 150));
 			winwin->setLayout(new GroupLayout());
 			winwin->setVisible(true);
-			new Label(winwin, "" , "sans-bold");
+			new Label(winwin, "", "sans-bold");
 			Widget *winner = new Widget(winwin);
 			winner->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 3, 1));
 
-			Button *h1 = new Button(winner,"Maximum");
-			h1->setFixedSize(Vector2i(88,20));
-			h1->setCallback([] 
+			Button *h1 = new Button(winner, "Maximum");
+			h1->setFixedSize(Vector2i(88, 20));
+			h1->setCallback([&]
 			{
 				winwin->dispose();
+				bf[i]->setVisible(true);
 			}
 			);
 
 			Button *h2 = new Button(winner, "Minimum");
 			h2->setFixedSize(Vector2i(88, 20));
-			h2->setCallback([]
+			h2->setCallback([&]
 			{
 				winwin->dispose();
+				bf[i]->setVisible(true);
 			}
 			);
 
 			Button *h3 = new Button(winner, "Farbe");
 			h3->setFixedSize(Vector2i(88, 20));
-			h3->setCallback([]
+			h3->setCallback([&]
 			{
 				winwin->dispose();
+				bf[i]->setVisible(true);
 			}
 			);
 
 			Button *h4 = new Button(winner, "y-Wert");
 			h4->setFixedSize(Vector2i(88, 20));
-			h4->setCallback([]
+			h4->setCallback([&]
 			{
 				winwin->dispose();
+				bf[i]->setVisible(true);
 				Window *valuewin = new Window(screen, "x Berechnung");
 				valuewin->setFixedSize(Vector2i(130, 200));
 				valuewin->setPosition(Vector2i(220, 150));
@@ -508,9 +594,10 @@ int main(int argc, char **argv)
 
 			Button *h5 = new Button(winner, "x-Wert");
 			h5->setFixedSize(Vector2i(88, 20));
-			h5->setCallback([]
+			h5->setCallback([&]
 			{
 				winwin->dispose();
+				bf[i]->setVisible(true);
 				Window *valuewin = new Window(screen, "x Berechnung");
 				valuewin->setFixedSize(Vector2i(130, 200));
 				valuewin->setPosition(Vector2i(220, 150));
@@ -550,13 +637,14 @@ int main(int argc, char **argv)
 			}
 			);
 
-			if (makeit3d) 
+			if (makeit3d)
 			{
 				Button *h6 = new Button(winner, "z-Wert");
 				h6->setFixedSize(Vector2i(88, 20));
-				h6->setCallback([]
+				h6->setCallback([&]
 				{
 					winwin->dispose();
+					bf[i]->setVisible(true);
 					Window *valuewin = new Window(screen, "z Berechnung");
 					valuewin->setFixedSize(Vector2i(130, 200));
 					valuewin->setPosition(Vector2i(220, 150));
@@ -597,7 +685,7 @@ int main(int argc, char **argv)
 				}
 				);
 			}
-
+		}
 
 			screen->performLayout();
 			});
@@ -657,6 +745,7 @@ int main(int argc, char **argv)
 			}
 		});
 
+		
 
 		using namespace std;
 		//Button für speichern
