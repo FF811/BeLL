@@ -42,11 +42,10 @@ nanogui::CheckBox *cb2 = nullptr;
 nanogui::Window *w3 =  nullptr;
 nanogui::TextBox *t = nullptr;
 nanogui::Widget *fun[10] = { nullptr };
-nanogui::Button *h[10] = { nullptr };
-nanogui::Popup *popup[10] = { nullptr };
+nanogui::Window *winwin =  nullptr ;
 nanogui::Slider *zoomslide = nullptr;
 int width, height;
-nanogui::PopupButton *bf[10] = { nullptr };
+nanogui::Button *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
 int functionnumber = 0;
@@ -326,12 +325,12 @@ int main(int argc, char **argv)
 	Fenster rechts
 	*************/
 #if 1
-	w = new nanogui::Window(screen, "");
+	w = new Window(screen, "");
 	w->setFixedSize(Vector2i(200, 700));
 	w->setPosition(Vector2i(10, 10));
 	w->setLayout(new GroupLayout());
 
-
+	
 
 	/**************
 	Label für 2D/3D
@@ -423,16 +422,186 @@ int main(int argc, char **argv)
 	{
 		Widget *Eingabe = new Widget(w2);
 		Eingabe->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Fill, 0, 10));
-		bf[i] = new PopupButton(Eingabe, "Funktion?");
+		bf[i] = new Button(Eingabe, "Funktion?");
 		bf[i]->setFixedSize(Vector2i(120, 20));
 		bf[i]->setVisible(true);
 		bf[i]->setEnabled(false);
 		bf[i]->setFontSize(15);
+		bf[i]->setCallback([&] 
+		{
+			winwin = new Window(screen,"Funktion" );
+			winwin->setFixedSize(Vector2i(125, 200));
+			winwin->setPosition(Vector2i(220, 150));
+			winwin->setLayout(new GroupLayout());
+			winwin->setVisible(true);
+			new Label(winwin, "" , "sans-bold");
+			Widget *winner = new Widget(winwin);
+			winner->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 3, 1));
 
-		/*popup[i]= bf[i]->popup();
-		popup[i]->setSide(popup[i]->Right);
-		popup[i]->setFixedSize(Vector2i(100,200));
-		h[i]->setFixedSize(Vector2i(120,20));*/
+			Button *h1 = new Button(winner,"Maximum");
+			h1->setFixedSize(Vector2i(88,20));
+			h1->setCallback([] 
+			{
+				winwin->dispose();
+			}
+			);
+
+			Button *h2 = new Button(winner, "Minimum");
+			h2->setFixedSize(Vector2i(88, 20));
+			h2->setCallback([]
+			{
+				winwin->dispose();
+			}
+			);
+
+			Button *h3 = new Button(winner, "Farbe");
+			h3->setFixedSize(Vector2i(88, 20));
+			h3->setCallback([]
+			{
+				winwin->dispose();
+			}
+			);
+
+			Button *h4 = new Button(winner, "y-Wert");
+			h4->setFixedSize(Vector2i(88, 20));
+			h4->setCallback([]
+			{
+				winwin->dispose();
+				Window *valuewin = new Window(screen, "x Berechnung");
+				valuewin->setFixedSize(Vector2i(130, 200));
+				valuewin->setPosition(Vector2i(220, 150));
+				valuewin->setLayout(new GroupLayout());
+				valuewin->setVisible(true);
+				valuewin->setFocused(true);
+				new Label(valuewin, "", "sans-bold");
+				Widget *valuewidget = new Widget(valuewin);
+				valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
+
+				TextBox *t1 = new TextBox(valuewidget, "0");
+				t1->setEditable(true);
+				t1->setFixedSize(Vector2i(88, 20));
+				t1->setFontSize(16);
+				t1->setTooltip("y-Wert eingeben");
+
+				if (makeit3d)
+				{
+					TextBox *t2 = new TextBox(valuewidget, "0");
+					t2->setEditable(true);
+					t2->setFixedSize(Vector2i(88, 20));
+					t2->setFontSize(16);
+					t2->setTooltip("z-Wert eingeben");
+				}
+
+				Button *calc1 = new Button(valuewidget, "Berechnen");
+				calc1->setFixedSize(Vector2i(88, 20));
+				calc1->setFontSize(16);
+				calc1->setTooltip("Berechnung des y-Wertes");
+
+				TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
+				t3->setEditable(false);
+				t3->setFixedSize(Vector2i(88, 29));
+				t3->setFontSize(21);
+				t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
+
+				screen->performLayout();
+			}
+			);
+
+			Button *h5 = new Button(winner, "x-Wert");
+			h5->setFixedSize(Vector2i(88, 20));
+			h5->setCallback([]
+			{
+				winwin->dispose();
+				Window *valuewin = new Window(screen, "x Berechnung");
+				valuewin->setFixedSize(Vector2i(130, 200));
+				valuewin->setPosition(Vector2i(220, 150));
+				valuewin->setLayout(new GroupLayout());
+				valuewin->setVisible(true);
+				new Label(valuewin, "", "sans-bold");
+				Widget *valuewidget = new Widget(valuewin);
+				valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
+
+				TextBox *t1 = new TextBox(valuewidget, "0");
+				t1->setEditable(true);
+				t1->setFixedSize(Vector2i(88, 20));
+				t1->setFontSize(16);
+				t1->setTooltip("y-Wert eingeben");
+
+				if (makeit3d)
+				{
+					TextBox *t2 = new TextBox(valuewidget, "0");
+					t2->setEditable(true);
+					t2->setFixedSize(Vector2i(88, 20));
+					t2->setFontSize(16);
+					t2->setTooltip("z-Wert eingeben");
+				}
+
+				Button *calc1 = new Button(valuewidget, "Berechnen");
+				calc1->setFixedSize(Vector2i(88, 20));
+				calc1->setFontSize(16);
+				calc1->setTooltip("Berechnung des y-Wertes");
+
+				TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
+				t3->setEditable(false);
+				t3->setFixedSize(Vector2i(88, 29));
+				t3->setFontSize(21);
+				t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
+
+				screen->performLayout();
+			}
+			);
+
+			if (makeit3d) 
+			{
+				Button *h6 = new Button(winner, "z-Wert");
+				h6->setFixedSize(Vector2i(88, 20));
+				h6->setCallback([]
+				{
+					winwin->dispose();
+					Window *valuewin = new Window(screen, "z Berechnung");
+					valuewin->setFixedSize(Vector2i(130, 200));
+					valuewin->setPosition(Vector2i(220, 150));
+					valuewin->setLayout(new GroupLayout());
+					valuewin->setVisible(true);
+					valuewin->setFocused(true);
+					new Label(valuewin, "", "sans-bold");
+					Widget *valuewidget = new Widget(valuewin);
+					valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
+
+					TextBox *t1 = new TextBox(valuewidget, "0");
+					t1->setEditable(true);
+					t1->setFixedSize(Vector2i(88, 20));
+					t1->setFontSize(16);
+					t1->setTooltip("x-Wert eingeben");
+
+					if (makeit3d)
+					{
+						TextBox *t2 = new TextBox(valuewidget, "0");
+						t2->setEditable(true);
+						t2->setFixedSize(Vector2i(88, 20));
+						t2->setFontSize(16);
+						t2->setTooltip("y-Wert eingeben");
+					}
+
+					Button *calc1 = new Button(valuewidget, "Berechnen");
+					calc1->setFixedSize(Vector2i(88, 20));
+					calc1->setFontSize(16);
+					calc1->setTooltip("Berechnung des y-Wertes");
+
+					TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
+					t3->setEditable(false);
+					t3->setFixedSize(Vector2i(88, 29));
+					t3->setFontSize(21);
+					t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
+
+					screen->performLayout();
+				}
+				);
+			}
+
+
+			screen->performLayout();
+			});
 		bfsupp[i] = new CheckBox(Eingabe, "~");
 		bfsupp[i]->setFixedSize(Vector2i(20, 20));
 		bfsupp[i]->setVisible(true);
@@ -536,7 +705,7 @@ int main(int argc, char **argv)
 		});
 
 	}
-
+	
 #endif 
 	/*************
 	Fenster unten

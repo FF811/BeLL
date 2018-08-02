@@ -101,7 +101,7 @@
       <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
         <ConfigurationType>Application</ConfigurationType>
         <CharacterSet>NotSet</CharacterSet>
-        <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+        <PlatformToolset>v141</PlatformToolset>
       </PropertyGroup>
     </Otherwise>
   </Choose>
