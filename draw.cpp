@@ -13,7 +13,10 @@ void drawfunction(std::string fctsh, int scale)
 
 	float x = -scale;
 	float y = -scale;
-	float resolution = 0.4;
+	float resolution = 0.8;
+	if (scale < 15) resolution = 0.5;
+	if (scale < 10) resolution = 0.3;
+	if (scale < 5) resolution = 0.1;
 	if (d3d(fctsh))
 
 	{
