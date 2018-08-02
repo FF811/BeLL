@@ -48,13 +48,14 @@ int width, height;
 nanogui::Button *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
+nanogui::ColorPicker *cp = nullptr;
 int functionnumber = 0;
 bool wired,makeit3d = true;
 bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz = 11;
 std::string fctsh[10] = { "0 "};
-int red[10], green[10], blue[10] = { 0 };
+float red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
 static std::string strval = "oink!";
 
@@ -454,13 +455,27 @@ int main(int argc, char **argv)
 			}
 			);
 
-			Button *h3 = new Button(winner, "Farbe");
+			/*Button *h3 = new Button(winner, "Farbe");
 			h3->setFixedSize(Vector2i(88, 20));
-			h3->setCallback([]
+			h3->setCallback([&]
 			{
 				winwin->dispose();
-			}
-			);
+				Window *color = new Window(screen, "Farbe");
+				color->setFixedSize(Vector2i(130, 150));
+				color->setPosition(Vector2i(220, 150));
+				color->setLayout(new GroupLayout());
+				color->setVisible(true);
+				color->setFocused(true);
+				Widget *colorw = new Widget(color);
+				colorw->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));*/
+			cp = new ColorPicker(winner);
+			cp->setColor(Vector4f(1,0,0,1));
+			cp->setCallback([&](Color col) {
+				red[i] = col[1];
+				green[i] = col[2];
+				blue[i] = col[3];
+			});
+			
 
 			Button *h4 = new Button(winner, "y-Wert");
 			h4->setFixedSize(Vector2i(88, 20));
