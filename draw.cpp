@@ -8,13 +8,13 @@
 #include "functions.h"
 #include <gl/GLU.h>
 
-void drawfunction(std::string fctsh, int scale)
+void drawfunction(std::string fct, int scale)
 {
 
 	float x = -scale;
 	float y = -scale;
 	float resolution;
-	if (d3d(fctsh))
+	if (d3d(fct))
 
 	{	
 		resolution = -x / 20;
@@ -26,8 +26,8 @@ void drawfunction(std::string fctsh, int scale)
 				
 			
 				
-					glVertex3f(x, y, to_value(fctsh, x, y, true));
-					glVertex3f(x + resolution,y, to_value(fctsh, x + resolution, y, true));
+					glVertex3f(x, y, to_value(fct, x, y, true));
+					glVertex3f(x + resolution,y, to_value(fct, x + resolution, y, true));
 					y = y + resolution;
 				
 				
@@ -42,7 +42,7 @@ void drawfunction(std::string fctsh, int scale)
 		while (x < scale)
 		{
 
-			glVertex3f(x, to_value(fctsh, x, y, false), 0);
+			glVertex3f(x, to_value(fct, x, y, false), 0);
 			x = x + resolution;
 
 		}

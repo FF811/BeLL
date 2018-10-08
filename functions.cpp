@@ -1,5 +1,5 @@
 #include "functions.h"
-
+#include "math.h"
 
 /******************************************************************************
 Funktionskram
@@ -172,11 +172,7 @@ float to_value(string post, float x, float y, bool d)
 		{
 			op1 = s.top(); s.pop();
 			op2 = s.top(); s.pop();
-			float e = 1;
-			for (int j = 0; j < op1; ++j)
-			{
-				e = e * op2;
-			}
+			float e = pow(op2,op1);
 			s.push(e);
 		}
 		else if (post[i] >= '0' && post[i] <= '9')

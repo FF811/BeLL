@@ -54,8 +54,7 @@ bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz= 11;
 float eyedistance = 6;
-int eye = 1;
-std::string fctsh[10] = { "0 "};
+std::string fct[10] = { "0 "};
 int red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
 static std::string strval = "oink!";
@@ -248,12 +247,12 @@ float beta = 0;
 
 
 // main display function. this will be called twice per frame.
-bool display_funktion(int righteye)
+bool display_funktion()
 {
-	eyedistance = 0,3;
+	eyedistance = 0.3;
 	glColor3f(1, 1, 1);
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(eyedistance,-eyedistance, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
 		m = glm::lookAt(vec3(distanz + eyedistance, distanz - eyedistance, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
@@ -263,7 +262,7 @@ bool display_funktion(int righteye)
 	glLoadMatrixf(glm::value_ptr(m));
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glColorMask(true,false,false, false); 
+	if (makeit3d) { glColorMask(true, false, false, false); }
 	glClearColor(0.0, 0.0, 0.0, 1);
 	glColor3f(1, 1, 1);
 
@@ -291,11 +290,11 @@ bool display_funktion(int righteye)
 	for (int i = 0; i < functionnumber; i++) 
 		{ if (bfsupp[i]->checked())
 			{ 
-				/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fctsh[i]) == makeit3d)	drawfunction(fctsh[i], distanz); 
+				/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz); 
 			} 
 		};
 	drawcoordinates(distanz);
-
+	if (!makeit3d) { return true; }
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -306,6 +305,7 @@ bool display_funktion(int righteye)
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
+	glClear(GL_DEPTH_BUFFER_BIT);
 	glColorMask(false, true, false, false);
 	glClearColor(0.0, 0.0, 0.0, 1);
 	
@@ -336,13 +336,13 @@ bool display_funktion(int righteye)
 	{
 		if (bfsupp[i]->checked())
 		{
-			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fctsh[i]) == makeit3d)	drawfunction(fctsh[i], distanz);
+			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz);
 		}
 	};
 	drawcoordinates(distanz);
 
 	glPopMatrix();
-
+	
 
 
 	return true;
@@ -433,7 +433,7 @@ int main(int argc, char **argv)
 			
 		
 			
-		fctsh[functionnumber] = t->value(); fctsh[functionnumber] = to_postfix(fctsh[functionnumber]);
+		fct[functionnumber] = t->value(); fct[functionnumber] = to_postfix(fct[functionnumber]);
 		bf[functionnumber]->setCaption(t->value());
 		bf[functionnumber]->setEnabled(true);
 		bfsupp[functionnumber]->setEnabled(true);
@@ -689,7 +689,7 @@ int main(int argc, char **argv)
 					bfsupp[i]->setEnabled(false);
 					bf[i]->setEnabled(false);
 					bf[i]->setCaption("Funktion?");
-					fctsh[i] = "0";
+					fct[i] = "0";
 					if (functionnumber > 0) functionnumber--;
 				}
 			for (int i = 0; i < 10; i++)
@@ -701,8 +701,8 @@ int main(int argc, char **argv)
 			bfsupp[i]->setEnabled(false);
 			bfsupp[i-x]->setEnabled(true); 
 			bfsupp[i - x]->setChecked(true);
-			fctsh[i - x] = fctsh[i];
-			fctsh[i] = "0";
+			fct[i - x] = fct[i];
+			fct[i] = "0";
 			bf[i]->setCaption("Funktion?");
 			bf[i]->setEnabled(false);
 			}
@@ -744,7 +744,7 @@ int main(int argc, char **argv)
 			if (s != "")
 			{
 				bf[r]->setCaption(s);
-				fctsh[r] = s;
+				fct[r] = s;
 				bf[r]->setEnabled(true);
 				bfsupp[r]->setEnabled(true);
 
@@ -850,7 +850,7 @@ int main(int argc, char **argv)
 	glPushMatrix();
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
-	while (display_funktion(eye) && !glfwWindowShouldClose(win))
+	while (display_funktion() && !glfwWindowShouldClose(win))
 	{
 	
 		glfwPollEvents();
@@ -859,7 +859,6 @@ int main(int argc, char **argv)
 		screen->drawWidgets();
 
 		glfwSwapBuffers(win);
-		eye = -eye;
 
 	}
 	// clean up!
