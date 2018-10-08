@@ -52,7 +52,9 @@ int functionnumber = 0;
 bool wired,makeit3d = true;
 bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
-float distanz = 11;
+float distanz= 11;
+float eyedistance = 6;
+int eye = 1;
 std::string fctsh[10] = { "0 "};
 int red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
@@ -245,13 +247,25 @@ float beta = 0;
 
 
 
-// main display function. this will be called once per frame.
-bool display_funktion()
+// main display function. this will be called twice per frame.
+bool display_funktion(int righteye)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	eyedistance = 0,3;
+	glColor3f(1, 1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glm::mat4 m = glm::lookAt(vec3(eyedistance,-eyedistance, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+	if (makeit3d)
+	{
+		m = glm::lookAt(vec3(distanz + eyedistance, distanz - eyedistance, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
+	}
 
-	
-	glColor3f(0, 0, 0);
+	glLoadIdentity();
+	glLoadMatrixf(glm::value_ptr(m));
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glColorMask(true,false,false, false); 
+	glClearColor(0.0, 0.0, 0.0, 1);
+	glColor3f(1, 1, 1);
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
@@ -277,22 +291,58 @@ bool display_funktion()
 	for (int i = 0; i < functionnumber; i++) 
 		{ if (bfsupp[i]->checked())
 			{ 
-				glColor3f(red[i], green[i], blue[i]); if (d3d(fctsh[i]) == makeit3d)	drawfunction(fctsh[i], distanz); 
+				/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fctsh[i]) == makeit3d)	drawfunction(fctsh[i], distanz); 
 			} 
 		};
 	drawcoordinates(distanz);
 
 	glPopMatrix();
-
 	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+	m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
-		m = glm::lookAt(vec3(distanz, distanz, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
+		m = glm::lookAt(vec3(distanz - eyedistance, distanz + eyedistance, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
 	}
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
+	glColorMask(false, true, false, false);
+	glClearColor(0.0, 0.0, 0.0, 1);
+	
+
+	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+	glPushMatrix();
+	glLineWidth(1.0);
+	if (makeit3d)
+	{
+		if (moveit) {
+			//diffz = diffz * 0.36;
+			sumz = sumz + diffz;
+			if (sumz >= 360) { sumz = sumz - 360; };
+			if (sumz <= -360) { sumz = sumz + 360; };
+			//diffxy = diffxy * 0.36;
+			sumxy = sumxy + diffxy;
+			if (sumxy >= 360) { sumxy = sumxy - 360; };
+			if (sumxy <= -360) { sumxy = sumxy + 360; };
+
+
+		}
+
+		glRotatef(sumz, 0, 0, 1);
+		glRotatef(sumxy, -sin((45 - sumz)*pi / 180), cos((45 - sumz)*pi / 180), 0);
+	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
+	for (int i = 0; i < functionnumber; i++)
+	{
+		if (bfsupp[i]->checked())
+		{
+			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fctsh[i]) == makeit3d)	drawfunction(fctsh[i], distanz);
+		}
+	};
+	drawcoordinates(distanz);
+
+	glPopMatrix();
+
 
 
 	return true;
@@ -319,7 +369,7 @@ int main(int argc, char **argv)
 	// Create nanogui gui
 	using namespace nanogui;
 	bool enabled = true;
-	glClearColor(0.7, 0.7, 0.7, 1);
+	
 
 	/*************
 	Fenster rechts
@@ -776,7 +826,7 @@ int main(int argc, char **argv)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
-
+	glColor3f(1, 1, 1);
 
 
 
@@ -800,7 +850,7 @@ int main(int argc, char **argv)
 	glPushMatrix();
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
-	while (display_funktion() && !glfwWindowShouldClose(win))
+	while (display_funktion(eye) && !glfwWindowShouldClose(win))
 	{
 	
 		glfwPollEvents();
@@ -809,6 +859,7 @@ int main(int argc, char **argv)
 		screen->drawWidgets();
 
 		glfwSwapBuffers(win);
+		eye = -eye;
 
 	}
 	// clean up!
