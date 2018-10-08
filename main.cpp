@@ -388,7 +388,7 @@ int main(int argc, char **argv)
 	{
 		new Label(w, "", "sans-bold");
 		Widget *Dim = new Widget(w);
-		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 3));
+		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 4));
 
 		Button *dimension = new Button(Dim, "3D");
 		dimension->setFixedSize(Vector2i(20,20));
@@ -397,6 +397,7 @@ int main(int argc, char **argv)
 		dimension->setBackgroundColor(Color(142, 69, 15, 255));
 		dimension->setCallback([&dimension] {if (dimension->caption() == "2D") { dimension->setCaption("3D"); makeit3d = true; }
 		else { dimension->setCaption("2D"); makeit3d = false; } });
+
 	}
 
 	/****************
@@ -754,6 +755,39 @@ int main(int argc, char **argv)
 		f.close();
 		});
 
+		/******************
+		BearbeitungsLabel
+		*******************/
+		new Label(w, "", "sans-bold");
+		Widget *Settings1 = new Widget(w);
+		Settings1->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 4));
+
+		Button *switcheyes = new Button(Settings1, "Switch Eyes");
+		switcheyes->setFixedSize(Vector2i(80, 20));
+		switcheyes->setFontSize(18);
+		switcheyes->setTooltip("Augen tauschen!");
+		switcheyes->setBackgroundColor(Color(60, 120, 12, 255));
+		switcheyes->setCallback([&switcheyes] {});
+
+		new Label(w, "", "sans-bold");
+		Widget *Settings2 = new Widget(w);
+		Settings2->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 4));
+
+		new Label (Settings2, "Augenabstand:","sans-bold");
+
+		TextBox *eyedistance = new TextBox(Settings2);
+		eyedistance->setEditable(true);
+		eyedistance->setFixedSize(Vector2i(40, 20));
+		eyedistance->setValue("0,065");
+		eyedistance->setFontSize(16);
+		eyedistance->setTooltip("Abstand der Augen in Metern");
+
+		Button *distancebutton = new Button(Settings2, "#");
+		distancebutton->setFixedSize(Vector2i(20, 20));
+		distancebutton->setFontSize(18);
+		distancebutton->setTooltip("Augenabstand bestätigen");
+		distancebutton->setBackgroundColor(Color(60, 60, 60, 255));
+		distancebutton->setCallback([&distancebutton] {});
 	}
 	
 #endif 
