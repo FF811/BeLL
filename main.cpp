@@ -53,7 +53,7 @@ bool wired,makeit3d = true;
 bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz= 11;
-float eyedistance = 6;
+float eyedistance = 0.3;
 std::string fct[10] = { "0 "};
 int red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
@@ -249,7 +249,6 @@ float beta = 0;
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
-	eyedistance = 0.3;
 	glColor3f(1, 1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -767,7 +766,7 @@ int main(int argc, char **argv)
 		switcheyes->setFontSize(18);
 		switcheyes->setTooltip("Augen tauschen!");
 		switcheyes->setBackgroundColor(Color(60, 120, 12, 255));
-		switcheyes->setCallback([&switcheyes] {});
+		switcheyes->setCallback([&switcheyes] {eyedistance = -eyedistance; std::cout << "changed eyes" << std::endl; });
 
 		new Label(w, "", "sans-bold");
 		Widget *Settings2 = new Widget(w);
@@ -775,21 +774,21 @@ int main(int argc, char **argv)
 
 		new Label (Settings2, "Augenabstand:","sans-bold");
 
-		TextBox *eyedistance = new TextBox(Settings2);
-		eyedistance->setEditable(true);
-		eyedistance->setFixedSize(Vector2i(40, 20));
-		eyedistance->setValue("0,065");
-		eyedistance->setFontSize(16);
-		eyedistance->setTooltip("Abstand der Augen in Metern");
+		TextBox *eyedistanz = new TextBox(Settings2);
+		eyedistanz->setEditable(true);
+		eyedistanz->setFixedSize(Vector2i(40, 20));
+		eyedistanz->setValue("0.06");
+		eyedistanz->setFontSize(16);
+		eyedistanz->setTooltip("Abstand der Augen in Metern");
 
 		Button *distancebutton = new Button(Settings2, "#");
 		distancebutton->setFixedSize(Vector2i(20, 20));
 		distancebutton->setFontSize(18);
 		distancebutton->setTooltip("Augenabstand bestätigen");
 		distancebutton->setBackgroundColor(Color(60, 60, 60, 255));
-		distancebutton->setCallback([&distancebutton] {});
+		distancebutton->setCallback([&distancebutton, &eyedistanz] {eyedistance = 5*stof(eyedistanz->value()); std::cout << "set eyedistance to " << eyedistanz->value() << std::endl; });
 	}
-	
+
 #endif 
 	/*************
 	Fenster unten
