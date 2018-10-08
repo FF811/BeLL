@@ -59,10 +59,52 @@ int red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
 static std::string strval = "oink!";
 
+GLuint fbo = 0;
+GLuint drb = 0;
+GLuint tex[2] = {0,0};
+
+static void regen_fbo(int w, int h)
+{
+	if (!fbo) // ...... initialisierung von fbo und tex und drb
+	{
+		glGenFramebuffers(1, &fbo);		
+		glGenTextures(2, tex);
+		glGenRenderbuffers(1, &drb);
+
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	
+	// Allocate memory for texture
+	for(int i = 0; i< 2; i++)
+	{
+	glBindTexture(GL_TEXTURE_2D, tex[i]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	// Poor filtering. Needed !
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
+	// Allocate memory for renderbuffer
+	glBindRenderbuffer(GL_RENDERBUFFER, drb);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+	
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[0], 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, drb);
+	
+	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		printf("foooo!\n");
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+}
+
 /* This function is registered as the framebuffer size callback for GLFW,
 * so GLFW will call this during glfwPollEvents() whenever the window is resized. */
 static void callback_Resize(GLFWwindow *win, int wi, int h)
 {
+	regen_fbo(wi, h);
 	void* user_pointer = glfwGetWindowUserPointer(win);
 	glViewport(0, 0, wi, h);
 	printf("new framebuffer size izz da: %dx%d pixels\n", wi, h);
