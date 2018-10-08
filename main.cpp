@@ -78,10 +78,13 @@ static void regen_fbo(int w, int h)
 	for(int i = 0; i< 2; i++)
 	{
 	glBindTexture(GL_TEXTURE_2D, tex[i]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	// Poor filtering. Needed !
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 	// Allocate memory for renderbuffer
 	glBindRenderbuffer(GL_RENDERBUFFER, drb);
@@ -285,9 +288,12 @@ GLUquadric* quadric;
 float alpha = 0;
 float beta = 0;
 
+void draw_plot()
+{
+	// TODO Render the scene
+}
 
-
-
+void render_texture(GLuint tex);
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
@@ -302,10 +308,14 @@ bool display_funktion()
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[0], 0);
+
+	glClearColor(0.0, 0.0, 0.0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
-	if (makeit3d) { glColorMask(true, false, false, false); }
-	glClearColor(0.0, 0.0, 0.0, 1);
+	if (makeit3d) { /* Do something! */ }
+
 	glColor3f(1, 1, 1);
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
@@ -347,9 +357,11 @@ bool display_funktion()
 
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glColorMask(false, true, false, false);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[1], 0);
 	glClearColor(0.0, 0.0, 0.0, 1);
+	glClear(GL_DEPTH_BUFFER_BIT| GL_COLOR_BUFFER_BIT);
+
 	
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
@@ -384,10 +396,54 @@ bool display_funktion()
 	drawcoordinates(distanz);
 
 	glPopMatrix();
+	glColorMask(true, true, true, true);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0, 0, 0, 1);
+	glDisable(GL_BLEND);
+	glDisable(GL_LIGHTING);
+
+
+	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	
-
-
+	glColorMask(true, false, false, true);
+	render_texture(tex[0]);
+	glColorMask(false, true, false, true);
+	render_texture(tex[1]);
+	glColorMask(true, true, true, true);
 	return true;
+}
+
+void render_texture(GLuint texture)
+{
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+	
+	glColor3f(1, 1, 1);
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0, 0);
+	glVertex4f(-1.0f, -1.0f, 0.0f,1);
+
+	glTexCoord2f(1,0);
+	glVertex4f( 1.0f, -1.0f, 0.0f,1);
+	glTexCoord2f(1, 1);
+	glVertex4f( 1.0f,  1.0f, 0.0f,1);
+	glTexCoord2f(0, 1);
+	glVertex4f(-1.0f,  1.0f, 0.0f,1);
+	glEnd();
+
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 /****************************************************************************
@@ -924,6 +980,8 @@ int main(int argc, char **argv)
 	glLoadMatrixf(glm::value_ptr(m));
 
 	glPushMatrix();
+	regen_fbo(width,height);
+	glEnable(GL_TEXTURE_2D);
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
 	while (display_funktion() && !glfwWindowShouldClose(win))
