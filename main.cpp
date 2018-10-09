@@ -53,11 +53,13 @@ bool wired,makeit3d = true;
 bool moveit = false;
 float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
 float distanz= 11;
-float eyedistance = 0.3;
+float eyedistance = 0.065;
 std::string fct[10] = { "0 "};
 int red[10], green[10], blue[10] = { 0 };
 static bool bval = false;
 static std::string strval = "oink!";
+float paradis ;
+glm::mat4 p[2];
 
 GLuint fbo = 0;
 GLuint drb = 0;
@@ -102,8 +104,19 @@ static void regen_fbo(int w, int h)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 }
-
-/* This function is registered as the framebuffer size callback for GLFW,
+static void frustum()
+{
+	float top = tan(glm::radians(60.0f) / 2)*0.1f,
+		bottom = -top,
+		left = width / height * bottom,
+		right2 = -left;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	p[0] = glm::frustum(left, right2, bottom, top, 0.1f, 100.0f);
+	glLoadMatrixf(glm::value_ptr(p[0]));
+}
+	
+	/* This function is registered as the framebuffer size callback for GLFW,
 * so GLFW will call this during glfwPollEvents() whenever the window is resized. */
 static void callback_Resize(GLFWwindow *win, int wi, int h)
 {
@@ -117,6 +130,7 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 	w3->setPosition(Eigen::Vector2i(220, height - 70));
 	w->setPosition(Eigen::Vector2i(10, 10));
 	w2->setPosition(Eigen::Vector2i(15, 88));
+	frustum();
 }
 
 
@@ -297,12 +311,25 @@ void render_texture(GLuint tex,bool left);
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
+	float x = eyedistance / (2 * sqrt(2));
+	paradis = sqrt(3)*distanz;
+	float o = (eyedistance / 2 * 0.1) / paradis;
 	glColor3f(1, 1, 1);
+
+	float top = tan(glm::radians(60.0f) / 2)*0.1f,
+		bottom = -top,
+		left = (width / height * bottom)+o,
+		right2 = -(width / height * bottom)+o;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	p[0] = glm::frustum(left, right2, bottom, top, 0.1f, 100.0f);
+	glLoadMatrixf(glm::value_ptr(p[0]));
+
 	glMatrixMode(GL_MODELVIEW);
 	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
-		m = glm::lookAt(vec3(distanz + eyedistance, distanz - eyedistance, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
+		m = glm::lookAt(vec3(distanz - x, distanz + x, distanz), vec3(-x,x, 0), vec3(0, 0, 1));
 	}
 
 	glLoadIdentity();
@@ -314,7 +341,7 @@ bool display_funktion()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (makeit3d) { /* Do something! */ }
-
+   
 	glColor3f(1, 1, 1);
 
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
@@ -348,11 +375,17 @@ bool display_funktion()
 	drawcoordinates(distanz);
 	if (!makeit3d) { return true; }
 	glPopMatrix();
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	p[1] = glm::frustum(-right2, -left, bottom, top, 0.1f, 100.0f);
+	glLoadMatrixf(glm::value_ptr(p[1]));
+
 	glMatrixMode(GL_MODELVIEW);
 	m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
-		m = glm::lookAt(vec3(distanz - eyedistance, distanz + eyedistance, distanz), vec3(0, 0, 0), vec3(0, 0, 1));
+		m = glm::lookAt(vec3(distanz + x, distanz - x, distanz), vec3(x, -x, 0), vec3(0, 0, 1));
 	}
 
 	glLoadIdentity();
@@ -952,7 +985,7 @@ int main(int argc, char **argv)
 		distancebutton->setFontSize(18);
 		distancebutton->setTooltip("Augenabstand bestätigen");
 		distancebutton->setBackgroundColor(Color(60, 60, 60, 255));
-		distancebutton->setCallback([&distancebutton, &eyedistanz] {eyedistance = 5*stof(eyedistanz->value()); std::cout << "set eyedistance to " << eyedistanz->value() << std::endl; });
+		distancebutton->setCallback([&distancebutton, &eyedistanz] {eyedistance = stof(eyedistanz->value()); std::cout << "set eyedistance to " << eyedistanz->value() << std::endl; });
 	}
 
 #endif 
@@ -1033,11 +1066,8 @@ int main(int argc, char **argv)
 	quadric = gluNewQuadric();
 
 	// set up example projection matrix
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 
-	glm::mat4 p = glm::perspective(glm::radians(60.0f), 3.0f / 2.0f, 0.1f, 100.0f);
-	glLoadMatrixf(glm::value_ptr(p));
+	frustum();
 
 	// set up example model view matrix
 	glMatrixMode(GL_MODELVIEW);
