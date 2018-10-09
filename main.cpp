@@ -403,7 +403,7 @@ bool display_funktion()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(0, 0, 0, 1);
 	//glDisable(GL_BLEND);
-	//glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
 
 
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -578,7 +578,7 @@ int main(int argc, char **argv)
 		TextBox *t = new TextBox(Eingabe);
 		t->setEditable(true);
 		t->setFixedSize(Vector2i(110, 20));
-		t->setValue("x^3");
+		t->setValue("x^3+y^3");
 		t->setFontSize(20);
 		t->setTooltip("Funktion eingeben");
 		
