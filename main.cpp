@@ -293,7 +293,7 @@ void draw_plot()
 	// TODO Render the scene
 }
 
-void render_texture(GLuint tex);
+void render_texture(GLuint tex,bool left);
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
@@ -312,7 +312,7 @@ bool display_funktion()
 
 	glClearColor(0.0, 0.0, 0.0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+
 	if (makeit3d) { /* Do something! */ }
 
 	glColor3f(1, 1, 1);
@@ -341,6 +341,7 @@ bool display_funktion()
 	for (int i = 0; i < functionnumber; i++) 
 		{ if (bfsupp[i]->checked())
 			{ 
+		glColor3f(1, 1, 1);
 				/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz); 
 			} 
 		};
@@ -357,7 +358,9 @@ bool display_funktion()
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[1], 0);
+
 	glClearColor(0.0, 0.0, 0.0, 1);
 	glClear(GL_DEPTH_BUFFER_BIT| GL_COLOR_BUFFER_BIT);
 
@@ -389,30 +392,30 @@ bool display_funktion()
 	{
 		if (bfsupp[i]->checked())
 		{
+			glColor3f(1, 1, 1);
 			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz);
 		}
 	};
 	drawcoordinates(distanz);
 
 	glPopMatrix();
-	glColorMask(true, true, true, true);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(0, 0, 0, 1);
-	glDisable(GL_BLEND);
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_BLEND);
+	//glDisable(GL_LIGHTING);
 
 
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	
-	glColorMask(true, false, false, true);
-	render_texture(tex[0]);
-	glColorMask(false, true, false, true);
-	render_texture(tex[1]);
-	glColorMask(true, true, true, true);
+
+	render_texture(tex[0],true);
+	render_texture(tex[1],false);
+
 	return true;
 }
 
-void render_texture(GLuint texture)
+void render_texture(GLuint texture, bool left)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -424,6 +427,47 @@ void render_texture(GLuint texture)
 	glBindTexture(GL_TEXTURE_2D, texture);
 	
 	glColor3f(1, 1, 1);
+	
+	GLubyte pattern1[32][4] = { { 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 }
+	};
+
+	GLubyte pattern2[32][4] = { { 0,0,0,0 }, { 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 },{ 0,0,0,0 },
+	{ 255,255,255,255 }
+	};
+	glEnable(GL_POLYGON_STIPPLE);
+	if  (left)
+	{
+	
+	glPolygonStipple((GLubyte*)pattern1);
 	glBegin(GL_QUADS);
 
 	glTexCoord2f(0, 0);
@@ -431,12 +475,36 @@ void render_texture(GLuint texture)
 
 	glTexCoord2f(1,0);
 	glVertex4f( 1.0f, -1.0f, 0.0f,1);
+
 	glTexCoord2f(1, 1);
 	glVertex4f( 1.0f,  1.0f, 0.0f,1);
+	
 	glTexCoord2f(0, 1);
 	glVertex4f(-1.0f,  1.0f, 0.0f,1);
+	
 	glEnd();
+	}
+	else 
+	{
 
+	glPolygonStipple((GLubyte*)pattern2);
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0, 0);
+	glVertex4f(-1.0f, -1.0f, 0.0f, 1);
+
+	glTexCoord2f(1, 0);
+	glVertex4f(1.0f, -1.0f, 0.0f, 1);
+
+	glTexCoord2f(1, 1);
+	glVertex4f(1.0f, 1.0f, 0.0f, 1);
+
+	glTexCoord2f(0, 1);
+	glVertex4f(-1.0f, 1.0f, 0.0f, 1);
+
+	glEnd();
+	}
+	glDisable(GL_POLYGON_STIPPLE);
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
