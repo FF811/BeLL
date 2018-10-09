@@ -34,6 +34,7 @@ using namespace glm;
  /****************************************************************************
  * WINDOW-RELATED CALLBACKS                                                 *
  ****************************************************************************/
+//nanogui stuff
 nanogui::Screen *screen = nullptr;
 nanogui::Window *w = nullptr;
 nanogui::Window *w2 =nullptr;
@@ -44,30 +45,44 @@ nanogui::TextBox *t = nullptr;
 nanogui::Widget *fun[10] = { nullptr };
 nanogui::Window *winwin =  nullptr ;
 nanogui::Slider *zoomslide = nullptr;
-int width, height;
 nanogui::Button *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
+//format of the window
+int width, height;
+//counts number of functions
 int functionnumber = 0;
+//wired or 3d
 bool wired,makeit3d = true;
+//to move or not to move that's the question
 bool moveit = false;
-float x2, y2, xw, yw, counterz, diffz, counterxy, diffxy;
+//for calculating the movement
+float counterz, diffz, counterxy, diffxy;
+//rotating angle
 float sumz=45,sumxy = 45;
+//camera distance to (0|0|0)
 float distanz= 11;
+//eye distance
 float eyedistance = 0.065;
+//array for saving all functions
 std::string fct[10] = { "0 "};
+//array for saving the function's colors
 int red[10], green[10], blue[10] = { 0 };
-static bool bval = false;
-static std::string strval = "oink!";
+//parallax distance
 float paradis ;
+//projection matrices
 glm::mat4 p[2];
-
+//rtt stuff
 GLuint fbo = 0;
 GLuint drb = 0;
 GLuint tex[2] = {0,0};
 
+GLuint resolution[2] = { 0,0 };
+//generates or regenerates the fbo in case of resizing
 static void regen_fbo(int w, int h)
 {
+	w *= 2;
+	h *= 2;
 	if (!fbo) // ...... initialisierung von fbo und tex und drb
 	{
 		glGenFramebuffers(1, &fbo);		
@@ -83,8 +98,8 @@ static void regen_fbo(int w, int h)
 	glBindTexture(GL_TEXTURE_2D, tex[i]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	// Poor filtering. Needed !
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -122,10 +137,13 @@ static void frustum()
 static void callback_Resize(GLFWwindow *win, int wi, int h)
 {
 	regen_fbo(wi, h);
-	void* user_pointer = glfwGetWindowUserPointer(win);
-	glViewport(0, 0, wi, h);
-	printf("new framebuffer size izz da: %dx%d pixels\n", wi, h);
 	screen->resizeCallbackEvent(wi, h);
+	void* user_pointer = glfwGetWindowUserPointer(win);
+	glViewport(0, 0, 2*wi, 2*h);
+	resolution[0] = 2 * wi;
+	resolution[1] = 2 * h;
+	printf("new framebuffer size izz da: %dx%d pixels\n", wi, h);
+	
 	height = h;
 	width = wi;
 	w3->setPosition(Eigen::Vector2i(220, height - 70));
@@ -313,6 +331,7 @@ void render_texture(GLuint tex,bool left);
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
+	glViewport(0, 0, resolution[0], resolution[1]);
 	float x = eyedistance / 2.0f;
 	//*sqrt(2));
 	paradis = distanz;
@@ -350,7 +369,7 @@ bool display_funktion()
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	glPushMatrix();
-	glLineWidth(2.0);
+	glLineWidth(4.0);
 	if (makeit3d)
 	{if (moveit) {
 		//diffz = diffz * 0.36;
@@ -405,7 +424,7 @@ bool display_funktion()
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	glPushMatrix();
-	glLineWidth(2.0);
+	glLineWidth(4.0);
 	if (makeit3d)
 	{
 		if (moveit) {
@@ -444,7 +463,7 @@ bool display_funktion()
 
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	
-
+	glViewport(0, 0, resolution[0]/2, resolution[1]/2);
 	render_texture(tex[0],true);
 	render_texture(tex[1],false);
 
@@ -1081,6 +1100,8 @@ int main(int argc, char **argv)
 
 	glPushMatrix();
 	regen_fbo(width,height);
+	resolution[0] = width*2;
+	resolution[1] = height*2;
 	glEnable(GL_TEXTURE_2D);
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
