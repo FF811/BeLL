@@ -8,3 +8,4 @@ Release/*
 build/*
 *.user
 saved.dat
+apitrace-msvc/*

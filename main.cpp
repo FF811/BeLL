@@ -51,7 +51,8 @@ nanogui::Button *b = nullptr;
 int functionnumber = 0;
 bool wired,makeit3d = true;
 bool moveit = false;
-float x2, y2, xw, yw, counterz,diffz,counterxy,diffxy,sumz,sumxy = 0;
+float x2, y2, xw, yw, counterz, diffz, counterxy, diffxy;
+float sumz=45,sumxy = 45;
 float distanz= 11;
 float eyedistance = 0.065;
 std::string fct[10] = { "0 "};
@@ -208,6 +209,7 @@ static void callback_MouseButton(GLFWwindow *win, int button, int action, int mo
 			moveit = true;
 			diffxy = 0;
 			diffz = 0;
+			std::cout << "Drehung um um x: " << sumxy << "; um z: " << sumz << std::endl;
 		}
 		if (action == GLFW_RELEASE)
 		{
@@ -311,8 +313,9 @@ void render_texture(GLuint tex,bool left);
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
-	float x = eyedistance / (2 * sqrt(2));
-	paradis = sqrt(3)*distanz;
+	float x = eyedistance / 2.0f;
+	//*sqrt(2));
+	paradis = distanz;
 	float o = (eyedistance / 2 * 0.1) / paradis;
 	glColor3f(1, 1, 1);
 
@@ -329,7 +332,7 @@ bool display_funktion()
 	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
-		m = glm::lookAt(vec3(distanz - x, distanz + x, distanz), vec3(-x,x, 0), vec3(0, 0, 1));
+		m = glm::lookAt(vec3(-x, -distanz, 0), vec3(-x,0, 0), vec3(0, 0, 1));
 	}
 
 	glLoadIdentity();
@@ -347,7 +350,7 @@ bool display_funktion()
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	glPushMatrix();
-	glLineWidth(1.0);
+	glLineWidth(2.0);
 	if (makeit3d)
 	{if (moveit) {
 		//diffz = diffz * 0.36;
@@ -363,7 +366,7 @@ bool display_funktion()
 	}
 	
 	glRotatef(sumz, 0, 0, 1);
-	glRotatef(sumxy, -sin((45-sumz)*pi/180), cos((45-sumz)*pi/180), 0);
+	glRotatef(sumxy, cos(sumz*pi/180),-sin(sumz*pi / 180), 0);
 	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
 	for (int i = 0; i < functionnumber; i++) 
 		{ if (bfsupp[i]->checked())
@@ -385,7 +388,7 @@ bool display_funktion()
 	m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
-		m = glm::lookAt(vec3(distanz + x, distanz - x, distanz), vec3(x, -x, 0), vec3(0, 0, 1));
+		m = glm::lookAt(vec3( x, -distanz, 0), vec3(x, 0, 0), vec3(0, 0, 1));
 	}
 
 	glLoadIdentity();
@@ -402,7 +405,7 @@ bool display_funktion()
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 	glPushMatrix();
-	glLineWidth(1.0);
+	glLineWidth(2.0);
 	if (makeit3d)
 	{
 		if (moveit) {
@@ -419,7 +422,7 @@ bool display_funktion()
 		}
 
 		glRotatef(sumz, 0, 0, 1);
-		glRotatef(sumxy, -sin((45 - sumz)*pi / 180), cos((45 - sumz)*pi / 180), 0);
+		glRotatef(sumxy, cos(sumz*pi / 180), -sin(sumz*pi / 180), 0);
 	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
 	for (int i = 0; i < functionnumber; i++)
 	{
