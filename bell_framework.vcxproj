@@ -30,7 +30,7 @@
     <ProjectGuid>{55C2F2CB-E232-4245-8D7A-14D73C26B176}</ProjectGuid>
     <RootNamespace>CG2Application</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Choose>
