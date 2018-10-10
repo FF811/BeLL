@@ -9,7 +9,7 @@
 #include <gl/GLU.h>
 
 //draws a postfix-function string scaled by integer scale
-void drawfunction(std::string fct, int scale)
+void drawfunction(std::string fct, int scale,float red,float green,float blue)
 {
 
 	float x = -scale;
@@ -26,7 +26,7 @@ void drawfunction(std::string fct, int scale)
 			while (y < scale) {
 				
 			
-				
+					glColor3f(red, green, blue);
 					glVertex3f(x, y, to_value(fct, x, y, true));
 					glVertex3f(x + resolution,y, to_value(fct, x + resolution, y, true));
 					y = y + resolution;

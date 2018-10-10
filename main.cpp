@@ -49,6 +49,7 @@ nanogui::Slider *zoomslide = nullptr;
 nanogui::Button *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
+nanogui::CheckBox *vrcb = nullptr;
 COpenVR ovr;
 //format of the window
 int width, height;
@@ -69,7 +70,7 @@ float eyedistance = 0.065;
 //array for saving all functions
 std::string fct[10] = { "0 "};
 //array for saving the function's colors
-int red[10], green[10], blue[10] = { 0 };
+float red[10] = { 0.0,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, }, green[10] = { 1.0,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, }, blue[10] = { 0.0,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, };
 //parallax distance
 float paradis ;
 int screenmode=2;
@@ -345,8 +346,8 @@ void draw_plot()
 	{
 		if (bfsupp[i]->checked())
 		{
-			glColor3f(1, 1, 1);
-			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz);
+			glColor3f(0.6, 0.6, 0.6);
+			if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz, red[i], green[i], blue[i]);
 		}
 	};
 
@@ -680,7 +681,7 @@ int main(int argc, char **argv)
 	
 
 	/*************
-	Fenster rechts
+	Fenster links
 	*************/
 #if 1
 	w = new Window(screen, "");
@@ -1081,7 +1082,7 @@ int main(int argc, char **argv)
 		switcheyes->setFontSize(18);
 		switcheyes->setTooltip("Augen tauschen!");
 		switcheyes->setBackgroundColor(Color(60, 120, 12, 255));
-		switcheyes->setCallback([&switcheyes] {eyedistance = -eyedistance; std::cout << "changed eyes" << std::endl; makeitvr = !makeitvr; });
+		switcheyes->setCallback([&switcheyes] {eyedistance = -eyedistance; std::cout << "changed eyes" << std::endl; });
 
 		new Label(w, "", "sans-bold");
 		Widget *Settings2 = new Widget(w);
@@ -1109,10 +1110,11 @@ int main(int argc, char **argv)
 
 		new Label(Settings3, "VR einschalten:", "sans-bold");
 
-		CheckBox *vr = new CheckBox(Settings3);
-		vr->setChecked(false);
-		vr->setFixedSize(Vector2i(20, 20));
-		vr->setTooltip("Wenn Haken, dann VR an!");
+		vrcb = new CheckBox(Settings3,"Nürnberg");
+		vrcb->setFixedSize(Vector2i(20, 20));
+		vrcb->setVisible(true);
+		vrcb->setEnabled(true);
+		vrcb->setFontSize(15);
 	}
 
 #endif 
@@ -1258,6 +1260,7 @@ int main(int argc, char **argv)
 
 		glfwSwapBuffers(win);
 		ovr.begin_cycle();
+		makeitvr = vrcb->checked();
 	}
 	// clean up!
 	glfwDestroyWindow(win);
