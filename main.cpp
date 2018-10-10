@@ -115,11 +115,13 @@ static void regen_fbo(int w, int h)
 	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 
+	//Check correctness
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		printf("foooo!\n");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 }
+//Frustum-function
 static void frustum()
 {
 	float top = tan(glm::radians(60.0f) / 2)*0.1f,
@@ -166,19 +168,6 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 	{
 		glfwSetWindowShouldClose(win, true);
 	}
-	/*if (key == GLFW_KEY_2 && action == GLFW_RELEASE)
-	{
-		glClearColor(0, 1, 0, 1);
-	}
-	if (key == GLFW_KEY_3 && action == GLFW_RELEASE)
-	{
-		glClearColor(0, 0, 1, 1);
-	}
-
-	if (key == GLFW_KEY_4 && action == GLFW_RELEASE)
-	{
-		glClearColor(0.4, 0.4, 0.4, 1);
-	}*/
 
 	if (key == GLFW_KEY_W && action == GLFW_RELEASE)
 	{
@@ -205,7 +194,6 @@ static void callback_Keyboard(GLFWwindow *win, int key, int scancode, int action
 
 static void callback_mousewheel(GLFWwindow *win, double xoffset, double yoffset)
 {
-	//std::cout << xoffset << "    " << yoffset << std::endl;
 	distanz = distanz - yoffset;
 	if (distanz > 21) { distanz = 21; }
 	if (distanz < 1) { distanz = 1; }
@@ -235,7 +223,6 @@ static void callback_MouseButton(GLFWwindow *win, int button, int action, int mo
 		}
 	}
 	screen->mouseButtonCallbackEvent(button, action, mods);
-	//std::cout << button << "    " << action << std::endl;
 }
 
 
@@ -249,7 +236,7 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 		diffz = x - counterz;
 	counterxy = y;
 	counterz = x;
-	//std::cout << diffz << "     " <<moveit<< std::endl;
+
 	w->setPosition(Eigen::Vector2i(10, 10));
 	w3->setPosition(Eigen::Vector2i(220, height - 70));
 	w2->setPosition(Eigen::Vector2i(15, 88));
@@ -262,13 +249,12 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 
 	GLFWwindow* win = nullptr;
 
-	/* initialize GLFW library */
+	// initialize GLFW library 
 	printf("initializing GLFW\n");
 	if (!glfwInit()) {
 		printf("Failed to initialze GLFW\n");
 		return nullptr;
 	}
-
 
 	/* request a OpenGL 4.3 compatibility profile context */
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -276,7 +262,6 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-
 
 	/* create the window and the gl context */
 	printf("creating window and OpenGL context\n");
@@ -290,6 +275,7 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 	/* store a pointer to our application context in GLFW's window data.
 	 * This allows us to access our data from within the callbacks */
 	glfwSetWindowUserPointer(win, user_pointer);
+
 	/* register our callbacks */
 	glfwSetFramebufferSizeCallback(win, callback_Resize);
 	glfwSetKeyCallback(win, callback_Keyboard);
@@ -299,6 +285,7 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 		[](GLFWwindow *, unsigned int codepoint) {
 		screen->charCallbackEvent(codepoint);
 	}
+
 	);
 	glfwSetScrollCallback(win, callback_mousewheel);
 
@@ -307,7 +294,6 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 	glfwMakeContextCurrent(win);
 
 	/* initialize glad (our opengl loader) */
-
 	printf("initializing glad\n");
 	if (!gladLoadGL()) {
 		printf("failed to intialize glad\n");
@@ -319,8 +305,6 @@ GLFWwindow* open_window(int w, int h, void* user_pointer = nullptr)
 
 // A global quadric used to draw the example sphere
 GLUquadric* quadric;
-float alpha = 0;
-float beta = 0;
 
 void draw_plot()
 {
@@ -328,12 +312,15 @@ void draw_plot()
 }
 
 void render_texture(GLuint tex,bool left);
+
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
+	//super sampling 
 	glViewport(0, 0, resolution[0], resolution[1]);
+	
+	//calculate frustum values
 	float x = eyedistance / 2.0f;
-	//*sqrt(2));
 	paradis = distanz;
 	float o = (eyedistance / 2 * 0.1) / paradis;
 	glColor3f(1, 1, 1);
@@ -342,97 +329,104 @@ bool display_funktion()
 		bottom = -top,
 		left = (width / height * bottom)+o,
 		right2 = -(width / height * bottom)+o;
+
+	//set up frustum
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	p[0] = glm::frustum(left, right2, bottom, top, 0.1f, 100.0f);
 	glLoadMatrixf(glm::value_ptr(p[0]));
 
+	//lookat for 2D/3D
 	glMatrixMode(GL_MODELVIEW);
 	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
 	if (makeit3d)
 	{
 		m = glm::lookAt(vec3(-x, -distanz, 0), vec3(-x,0, 0), vec3(0, 0, 1));
 	}
-
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
+
+	//texture NULL
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[0], 0);
-
 	glClearColor(0.0, 0.0, 0.0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (makeit3d) { /* Do something! */ }
+
+	//if (makeit3d) { /* Do something! */ }
    
+
 	glColor3f(1, 1, 1);
 
+
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+	
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+	
 	glPushMatrix();
 	glLineWidth(4.0);
+	
+	//calculate rotation angle
 	if (makeit3d)
-	{if (moveit) {
-		//diffz = diffz * 0.36;
-		sumz = sumz + diffz;
-		if (sumz >= 360) { sumz = sumz - 360; };
-		if (sumz <= -360) { sumz = sumz + 360; };
-		//diffxy = diffxy * 0.36;
-		sumxy = sumxy + diffxy;
-		if (sumxy >= 360) { sumxy = sumxy - 360; };
-		if (sumxy <= -360) { sumxy = sumxy + 360; };
+	{
+		if (moveit) {
+			
+			sumz = sumz + diffz;
+			if (sumz >= 360) { sumz = sumz - 360; };
+			if (sumz <= -360) { sumz = sumz + 360; };
+			sumxy = sumxy + diffxy;
+			if (sumxy >= 360) { sumxy = sumxy - 360; };
+			if (sumxy <= -360) { sumxy = sumxy + 360; };
 		
 		
 	}
-	
 	glRotatef(sumz, 0, 0, 1);
 	glRotatef(sumxy, cos(sumz*pi/180),-sin(sumz*pi / 180), 0);
-	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
+	}
+	
+	//draw functions
 	for (int i = 0; i < functionnumber; i++) 
-		{ if (bfsupp[i]->checked())
+		{ 
+		if (bfsupp[i]->checked())
 			{ 
 		glColor3f(1, 1, 1);
 				/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz); 
 			} 
 		};
+
+	//draw coordinate system
 	drawcoordinates(distanz);
-	if (!makeit3d) { return true; }
-	glPopMatrix();
 	
+	if (!makeit3d) { return true; }
+
+	//set up frustum
+	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	p[1] = glm::frustum(-right2, -left, bottom, top, 0.1f, 100.0f);
 	glLoadMatrixf(glm::value_ptr(p[1]));
 
+	//look at for 3D
 	glMatrixMode(GL_MODELVIEW);
-	m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
-	if (makeit3d)
-	{
-		m = glm::lookAt(vec3( x, -distanz, 0), vec3(x, 0, 0), vec3(0, 0, 1));
-	}
-
+	m = glm::lookAt(vec3( x, -distanz, 0), vec3(x, 0, 0), vec3(0, 0, 1));
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
+	
+	//texture EINS
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[1], 0);
-
 	glClearColor(0.0, 0.0, 0.0, 1);
 	glClear(GL_DEPTH_BUFFER_BIT| GL_COLOR_BUFFER_BIT);
 
-	
-
-	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
-	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+	//calculate rotation angle
 	glPushMatrix();
 	glLineWidth(4.0);
 	if (makeit3d)
 	{
 		if (moveit) {
-			//diffz = diffz * 0.36;
 			sumz = sumz + diffz;
 			if (sumz >= 360) { sumz = sumz - 360; };
 			if (sumz <= -360) { sumz = sumz + 360; };
-			//diffxy = diffxy * 0.36;
 			sumxy = sumxy + diffxy;
 			if (sumxy >= 360) { sumxy = sumxy - 360; };
 			if (sumxy <= -360) { sumxy = sumxy + 360; };
@@ -442,7 +436,9 @@ bool display_funktion()
 
 		glRotatef(sumz, 0, 0, 1);
 		glRotatef(sumxy, cos(sumz*pi / 180), -sin(sumz*pi / 180), 0);
-	}//glTranslatef(-distanz*sin((45 - sumz)*pi / 180), -distanz* cos((45 - sumz)*pi / 180),-distanz* cos((45 - sumxy)*pi / 180));
+	}
+
+	//draw functions
 	for (int i = 0; i < functionnumber; i++)
 	{
 		if (bfsupp[i]->checked())
@@ -451,24 +447,27 @@ bool display_funktion()
 			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz);
 		}
 	};
+	
+	//draw coordinate system
 	drawcoordinates(distanz);
 
+	//clear nearly all
 	glPopMatrix();
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(0, 0, 0, 1);
 	//glDisable(GL_BLEND);
 	glDisable(GL_LIGHTING);
-
-
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	
+	//super sampling
 	glViewport(0, 0, resolution[0]/2, resolution[1]/2);
+
+	//render textures (RTT)
 	render_texture(tex[0],true);
 	render_texture(tex[1],false);
-
 	return true;
 }
+
 
 void render_texture(GLuint texture, bool left)
 {
@@ -483,6 +482,7 @@ void render_texture(GLuint texture, bool left)
 	
 	glColor3f(1, 1, 1);
 	
+	//pattern for drawing only every second line (1,3,5,...)
 	GLubyte pattern1[32][4] = { { 255,255,255,255 },{ 0,0,0,0 },
 	{ 255,255,255,255 },{ 0,0,0,0 },
 	{ 255,255,255,255 },{ 0,0,0,0 },
@@ -501,6 +501,7 @@ void render_texture(GLuint texture, bool left)
 	{ 255,255,255,255 },{ 0,0,0,0 }
 	};
 
+	//pattern for drawing only every second line (2,4,6,...)
 	GLubyte pattern2[32][4] = { { 0,0,0,0 }, { 255,255,255,255 },{ 0,0,0,0 },
 	{ 255,255,255,255 },{ 0,0,0,0 },
 	{ 255,255,255,255 },{ 0,0,0,0 },
@@ -518,7 +519,11 @@ void render_texture(GLuint texture, bool left)
 	{ 255,255,255,255 },{ 0,0,0,0 },
 	{ 255,255,255,255 }
 	};
+
+	//execute polaristion...
 	glEnable(GL_POLYGON_STIPPLE);
+	
+	//...for left eye
 	if  (left)
 	{
 	
@@ -539,6 +544,8 @@ void render_texture(GLuint texture, bool left)
 	
 	glEnd();
 	}
+
+	//...for right eye
 	else 
 	{
 
@@ -559,6 +566,8 @@ void render_texture(GLuint texture, bool left)
 
 	glEnd();
 	}
+
+	//disable the polarisation
 	glDisable(GL_POLYGON_STIPPLE);
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -567,11 +576,6 @@ void render_texture(GLuint texture, bool left)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
-
-/****************************************************************************
-stupid functions of the program
-*****************************************************************************/
-
 
 /****************************************************************************
  * PROGRAM ENTRY POINT                                                      *
@@ -1019,6 +1023,7 @@ int main(int argc, char **argv)
 	w3->setFixedSize(Vector2i(850, 60));
 	w3->setPosition(Vector2i(220, height-70));
 	w3->setLayout(new GroupLayout());
+
 	//Label unten
 	new Label(w3, "", "sans-bold");
 	Widget *chgr = new Widget(w3);
@@ -1030,12 +1035,14 @@ int main(int argc, char **argv)
 		screenshot->setSize(Vector2i(50, 50));
 		screenshot->setTextColor(Color(12, 100, 130, 255));
 
+
 		Button *cam_fnct = new Button(chgr, "Funktion bewegen");
 		cam_fnct->setFixedSize(Vector2i(169,25));
 		cam_fnct->setFontSize(20);
 		cam_fnct->setCallback([&cam_fnct] {if (cam_fnct->caption() == "Funktion bewegen") cam_fnct->setCaption("Kamera bewegen"); 
 									else cam_fnct->setCaption("Funktion bewegen"); });
 	
+
 		ToolButton *reset = new ToolButton(chgr, ENTYPO_ICON_EYE);
 		reset->setSize(Vector2i(50, 50));
 		reset->setTextColor(Color(142, 69, 188, 255));
@@ -1061,28 +1068,29 @@ int main(int argc, char **argv)
 			zoomslide->setValue((distanz - 1) / 20); });
 
 #endif
+	//nanoGUI setVisible
 	screen->setVisible(true);
 	screen->performLayout();
 
-
+	//enable light staff
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
+	//light values
 	float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 	float diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
 	float specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float position[] = { -2.0f, 2.0f, -2.0f, 1.0f };
 
+	//set light
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
 	glColor3f(1, 1, 1);
-
-
 
 	//glClearColor(1, 0, 0, 1);
 	quadric = gluNewQuadric();
@@ -1094,15 +1102,18 @@ int main(int argc, char **argv)
 	// set up example model view matrix
 	glMatrixMode(GL_MODELVIEW);
 	glm::mat4 m = glm::lookAt(vec3(1,1,1), vec3(0, 0, 0), vec3(0, 0, 1));
-
 	glLoadIdentity();
 	glLoadMatrixf(glm::value_ptr(m));
 
 	glPushMatrix();
+
 	regen_fbo(width,height);
+	
 	resolution[0] = width*2;
 	resolution[1] = height*2;
+	
 	glEnable(GL_TEXTURE_2D);
+	
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
 	while (display_funktion() && !glfwWindowShouldClose(win))
