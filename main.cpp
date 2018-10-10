@@ -622,6 +622,12 @@ int main(int argc, char **argv)
 		dimension->setCallback([&dimension] {if (dimension->caption() == "2D") { dimension->setCaption("3D"); makeit3d = true; }
 		else { dimension->setCaption("2D"); makeit3d = false; } });
 
+		//Combobox for screening
+
+		ComboBox *screening = new ComboBox(Dim, {"Normal", "Anaglyph","3D-Bildschirm (Stereolines)", "Splitted" });
+		screening->setTooltip("Abbildungsmethode wählen!");
+		screening->setFontSize(15);
+		screening->setFixedSize(Vector2i(150, 20));
 	}
 
 	/****************
@@ -648,7 +654,7 @@ int main(int argc, char **argv)
 		a->setFontSize(28);
 		a->setTooltip("Vorlagen");
 		
-		
+
 		//add Button
 		b = new Button(Eingabe, "+");
 		b->setFixedSize(Vector2i(20, 20));
@@ -1012,6 +1018,17 @@ int main(int argc, char **argv)
 		distancebutton->setTooltip("Augenabstand bestätigen");
 		distancebutton->setBackgroundColor(Color(60, 60, 60, 255));
 		distancebutton->setCallback([&distancebutton, &eyedistanz] {eyedistance = stof(eyedistanz->value()); std::cout << "set eyedistance to " << eyedistanz->value() << std::endl; });
+	
+		new Label(w, "", "sans-bold");
+		Widget *Settings3 = new Widget(w);
+		Settings3->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 4));
+
+		new Label(Settings3, "VR einschalten:", "sans-bold");
+
+		CheckBox *vr = new CheckBox(Settings3);
+		vr->setChecked(false);
+		vr->setFixedSize(Vector2i(20, 20));
+		vr->setTooltip("Wenn Haken, dann VR an!");
 	}
 
 #endif 
@@ -1034,6 +1051,36 @@ int main(int argc, char **argv)
 		screenshot->setFontSize(20);
 		screenshot->setSize(Vector2i(50, 50));
 		screenshot->setTextColor(Color(12, 100, 130, 255));
+		screenshot->setCallback([] 
+			{
+			
+			// get the device context of the screen
+			HDC hScreenDC = CreateDC("DISPLAY", NULL, NULL, NULL);
+
+			// and a device context to put it in
+			HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
+
+			int width = GetDeviceCaps(hScreenDC, HORZRES);
+			int height = GetDeviceCaps(hScreenDC, VERTRES);
+
+			// maybe worth checking these are positive values
+			HBITMAP hBitmap = CreateCompatibleBitmap(hScreenDC, width, height);
+
+			// get a new bitmap
+			HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemoryDC, hBitmap);
+
+			BitBlt(hMemoryDC, 0, 0, width, height, hScreenDC, 0, 0, SRCCOPY);
+			hBitmap = (HBITMAP)SelectObject(hMemoryDC, hOldBitmap);
+
+			//WriteDIB(L"test.bmp", (HGLOBAL)hBitmap);
+
+			// clean up
+			DeleteDC(hMemoryDC);
+			DeleteDC(hScreenDC);
+
+			return hBitmap;
+
+			});
 
 
 		Button *cam_fnct = new Button(chgr, "Funktion bewegen");
