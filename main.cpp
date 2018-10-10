@@ -16,8 +16,9 @@
 #include <iostream>
 #include <stack>
 #include <fstream>
+#include "openvr_integration.h"
 
-
+#include <openvr.h>
 // GLM provides matries and vectors
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -48,6 +49,7 @@ nanogui::Slider *zoomslide = nullptr;
 nanogui::Button *bf[10] = { nullptr };
 nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
+COpenVR ovr;
 //format of the window
 int width, height;
 //counts number of functions
@@ -59,7 +61,7 @@ bool moveit = false;
 //for calculating the movement
 float counterz, diffz, counterxy, diffxy;
 //rotating angle
-float sumz=45,sumxy = 45;
+float sumz=0,sumxy = 0;
 //camera distance to (0|0|0)
 float distanz= 11;
 //eye distance
@@ -70,12 +72,19 @@ std::string fct[10] = { "0 "};
 int red[10], green[10], blue[10] = { 0 };
 //parallax distance
 float paradis ;
+int screenmode=2;
+bool makeitvr = false;
 //projection matrices
 glm::mat4 p[2];
 //rtt stuff
 GLuint fbo = 0;
 GLuint drb = 0;
-GLuint tex[2] = {0,0};
+GLuint tex[3] = {0,0};
+int normal= 0;
+int anaglyph= 1;
+int stereolines= 2;
+int splitted= 3;
+
 
 GLuint resolution[2] = { 0,0 };
 //generates or regenerates the fbo in case of resizing
@@ -127,10 +136,10 @@ static void frustum()
 	float top = tan(glm::radians(60.0f) / 2)*0.1f,
 		bottom = -top,
 		left = width / height * bottom,
-		right2 = -left;
+		right = -left;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	p[0] = glm::frustum(left, right2, bottom, top, 0.1f, 100.0f);
+	p[0] = glm::frustum(left, right, bottom, top, 0.1f, 100.0f);
 	glLoadMatrixf(glm::value_ptr(p[0]));
 }
 	
@@ -151,7 +160,7 @@ static void callback_Resize(GLFWwindow *win, int wi, int h)
 	w3->setPosition(Eigen::Vector2i(220, height - 70));
 	w->setPosition(Eigen::Vector2i(10, 10));
 	w2->setPosition(Eigen::Vector2i(15, 88));
-	frustum();
+	//frustum();
 }
 
 
@@ -308,118 +317,11 @@ GLUquadric* quadric;
 
 void draw_plot()
 {
-	// TODO Render the scene
-}
-
-void render_texture(GLuint tex,bool left);
-
-// main display function. this will be called twice per frame.
-bool display_funktion()
-{
-	//super sampling 
-	glViewport(0, 0, resolution[0], resolution[1]);
-	
-	//calculate frustum values
-	float x = eyedistance / 2.0f;
-	paradis = distanz;
-	float o = (eyedistance / 2 * 0.1) / paradis;
-	glColor3f(1, 1, 1);
-
-	float top = tan(glm::radians(60.0f) / 2)*0.1f,
-		bottom = -top,
-		left = (width / height * bottom)+o,
-		right2 = -(width / height * bottom)+o;
-
-	//set up frustum
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	p[0] = glm::frustum(left, right2, bottom, top, 0.1f, 100.0f);
-	glLoadMatrixf(glm::value_ptr(p[0]));
-
-	//lookat for 2D/3D
-	glMatrixMode(GL_MODELVIEW);
-	glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
-	if (makeit3d)
-	{
-		m = glm::lookAt(vec3(-x, -distanz, 0), vec3(-x,0, 0), vec3(0, 0, 1));
-	}
-	glLoadIdentity();
-	glLoadMatrixf(glm::value_ptr(m));
-
-	//texture NULL
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[0], 0);
-	glClearColor(0.0, 0.0, 0.0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	//if (makeit3d) { /* Do something! */ }
-   
-
-	glColor3f(1, 1, 1);
-
-
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
-	
+
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
-	
-	glPushMatrix();
-	glLineWidth(4.0);
-	
-	//calculate rotation angle
-	if (makeit3d)
-	{
-		if (moveit) {
-			
-			sumz = sumz + diffz;
-			if (sumz >= 360) { sumz = sumz - 360; };
-			if (sumz <= -360) { sumz = sumz + 360; };
-			sumxy = sumxy + diffxy;
-			if (sumxy >= 360) { sumxy = sumxy - 360; };
-			if (sumxy <= -360) { sumxy = sumxy + 360; };
-		
-		
-	}
-	glRotatef(sumz, 0, 0, 1);
-	glRotatef(sumxy, cos(sumz*pi/180),-sin(sumz*pi / 180), 0);
-	}
-	
-	//draw functions
-	for (int i = 0; i < functionnumber; i++) 
-		{ 
-		if (bfsupp[i]->checked())
-			{ 
-		glColor3f(1, 1, 1);
-				/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz); 
-			} 
-		};
-
-	//draw coordinate system
-	drawcoordinates(distanz);
-	
-	if (!makeit3d) { return true; }
-
-	//set up frustum
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	p[1] = glm::frustum(-right2, -left, bottom, top, 0.1f, 100.0f);
-	glLoadMatrixf(glm::value_ptr(p[1]));
-
-	//look at for 3D
-	glMatrixMode(GL_MODELVIEW);
-	m = glm::lookAt(vec3( x, -distanz, 0), vec3(x, 0, 0), vec3(0, 0, 1));
-	glLoadIdentity();
-	glLoadMatrixf(glm::value_ptr(m));
-	
-	//texture EINS
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[1], 0);
-	glClearColor(0.0, 0.0, 0.0, 1);
-	glClear(GL_DEPTH_BUFFER_BIT| GL_COLOR_BUFFER_BIT);
 
 	//calculate rotation angle
-	glPushMatrix();
 	glLineWidth(4.0);
 	if (makeit3d)
 	{
@@ -447,27 +349,209 @@ bool display_funktion()
 			/*glColor3f(red[i], green[i], blue[i]);*/ if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz);
 		}
 	};
-	
+
 	//draw coordinate system
 	drawcoordinates(distanz);
 
-	//clear nearly all
-	glPopMatrix();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0, 0, 0, 1);
-	//glDisable(GL_BLEND);
-	glDisable(GL_LIGHTING);
-	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-	
-	//super sampling
-	glViewport(0, 0, resolution[0]/2, resolution[1]/2);
-
-	//render textures (RTT)
-	render_texture(tex[0],true);
-	render_texture(tex[1],false);
-	return true;
 }
 
+void render_texture(GLuint tex,bool left);
+
+
+// main display function. this will be called twice per frame.
+bool display_funktion()
+{
+
+	
+	//calculate frustum values
+	float x = eyedistance / 2.0f;
+	paradis = distanz;
+	float o = (eyedistance / 2 * 0.1) / paradis;
+	glColor3f(1, 1, 1);
+
+	float top = tan(glm::radians(60.0f) / 2)*0.1f,
+		bottom = -top,
+		left = (width / height * bottom)+o,
+		right = -(width / height * bottom)+o;
+
+	/*if (screenmode == normal) {
+		//super sampling 
+		glViewport(0, 0, resolution[0], resolution[1]);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		p[0] = glm::frustum(left-o, right-o, bottom, top, 0.1f, 100.0f);
+		glLoadMatrixf(glm::value_ptr(p[0]));
+		glMatrixMode(GL_MODELVIEW);
+		glm::mat4 m = glm::lookAt(vec3(0, 0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+		if (makeit3d)
+		{
+			m = glm::lookAt(vec3(0, -distanz, 0), vec3(0, 0, 0), vec3(0, 0, 1));
+		}
+		glLoadIdentity();
+		glLoadMatrixf(glm::value_ptr(m));
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[2], 0);
+		glClearColor(0.0, 0.0, 0.0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glPushMatrix();
+		draw_plot();
+		glPopMatrix();
+		//super sampling
+		glViewport(0, 0, resolution[0] / 2, resolution[1] / 2);
+		render_texture(tex[2], true);
+	
+	}*/
+
+	/*if (screenmode==stereolines)
+	{
+		//super sampling 
+		glViewport(0, 0, resolution[0], resolution[1]);
+		//set up frustum
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		p[0] = glm::frustum(left, right, bottom, top, 0.1f, 100.0f);
+		glLoadMatrixf(glm::value_ptr(p[0]));
+		//lookat for 2D/3D
+		glMatrixMode(GL_MODELVIEW);
+		glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+		if (makeit3d)
+		{
+		m = glm::lookAt(vec3(-x, -distanz, 0), vec3(-x,0, 0), vec3(0, 0, 1));
+		}
+		glLoadIdentity();
+		glLoadMatrixf(glm::value_ptr(m));
+
+		//texture NULL
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[0], 0);
+		glClearColor(0.0, 0.0, 0.0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		//if (makeit3d) { /* Do something!  }
+
+
+		glColor3f(1, 1, 1);
+
+		draw_plot();
+
+		//set up frustum
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		p[1] = glm::frustum(-right, -left, bottom, top, 0.1f, 100.0f);
+		glLoadMatrixf(glm::value_ptr(p[1]));
+
+		//look at for 3D
+		glMatrixMode(GL_MODELVIEW);
+		m = glm::lookAt(vec3( x, -distanz, 0), vec3(x, 0, 0), vec3(0, 0, 1));
+		glLoadIdentity();
+		glLoadMatrixf(glm::value_ptr(m));
+
+		//texture EINS
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[1], 0);
+		glClearColor(0.0, 0.0, 0.0, 1);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		glPushMatrix();
+		draw_plot();
+
+		//clear nearly all
+		glPopMatrix();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0, 0, 0, 1);
+
+		//glDisable(GL_BLEND);
+		glDisable(GL_LIGHTING);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		//super sampling
+		glViewport(0, 0, resolution[0] / 2, resolution[1] / 2);
+
+		//render textures (RTT)
+		render_texture(tex[0], true);
+		render_texture(tex[1],false);
+	}*/
+
+	if (makeitvr)
+	{
+		//super sampling 
+		glViewport(0, 0, resolution[0], resolution[1]);
+		//set up frustum
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		//p[0] = glm::frustum(left, right, bottom, top, 0.1f, 100.0f);
+		p[0] = ovr.get_projection(0, 0.1f, 100.0f);
+		glLoadMatrixf(glm::value_ptr(p[0]));
+		//lookat for 2D/3D
+		glMatrixMode(GL_MODELVIEW);
+		glm::mat4 mvr = ovr.get_view(0);
+		/*glm::mat4 m = glm::lookAt(vec3(0,0, distanz), vec3(0, 0, 0), vec3(0, 1, 0));
+		if (makeit3d)
+		{
+			m = glm::lookAt(vec3(-x, -distanz, 0), vec3(-x,0, 0), vec3(0, 0, 1));
+		}*/
+		glLoadIdentity();
+		glLoadMatrixf(glm::value_ptr(mvr));
+
+		//texture NULL
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[0], 0);
+		glClearColor(0.0, 0.0, 0.0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		//if (makeit3d) { /* Do something!  }
+
+
+		glColor3f(1, 1, 1);
+
+		draw_plot();
+
+		//set up frustum
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		//p[1] = glm::frustum(-right, -left, bottom, top, 0.1f, 100.0f);
+		p[1] = ovr.get_projection(1, 0.1f, 100.0f);
+		glLoadMatrixf(glm::value_ptr(p[1]));
+
+		//look at for 3D
+		glMatrixMode(GL_MODELVIEW);
+		//m = glm::lookAt(vec3( x, -distanz, 0), vec3(x, 0, 0), vec3(0, 0, 1));
+		mvr = ovr.get_view(1);
+		glLoadIdentity();
+		glLoadMatrixf(glm::value_ptr(mvr));
+
+		//texture EINS
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex[1], 0);
+		glClearColor(0.0, 0.0, 0.0, 1);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		glPushMatrix();
+		draw_plot();
+
+		//clear nearly all
+		glPopMatrix();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0, 0, 0, 1);
+		//glDisable(GL_BLEND);
+		glDisable(GL_LIGHTING);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+
+
+		ovr.composite(tex[0], tex[1]);
+		//super sampling
+		glViewport(0, 0, resolution[0] / 2, resolution[1] / 2);
+		//render textures (RTT)
+		render_texture(tex[0], true);
+		//render_texture(tex[1],false);
+	}
+	return true;
+}
 
 void render_texture(GLuint texture, bool left)
 {
@@ -991,7 +1075,7 @@ int main(int argc, char **argv)
 		switcheyes->setFontSize(18);
 		switcheyes->setTooltip("Augen tauschen!");
 		switcheyes->setBackgroundColor(Color(60, 120, 12, 255));
-		switcheyes->setCallback([&switcheyes] {eyedistance = -eyedistance; std::cout << "changed eyes" << std::endl; });
+		switcheyes->setCallback([&switcheyes] {eyedistance = -eyedistance; std::cout << "changed eyes" << std::endl; makeitvr = !makeitvr; });
 
 		new Label(w, "", "sans-bold");
 		Widget *Settings2 = new Widget(w);
@@ -1113,7 +1197,8 @@ int main(int argc, char **argv)
 	resolution[1] = height*2;
 	
 	glEnable(GL_TEXTURE_2D);
-	
+	ovr.enable();
+
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
 	while (display_funktion() && !glfwWindowShouldClose(win))
@@ -1125,7 +1210,7 @@ int main(int argc, char **argv)
 		screen->drawWidgets();
 
 		glfwSwapBuffers(win);
-
+		ovr.begin_cycle();
 	}
 	// clean up!
 	glfwDestroyWindow(win);
@@ -1133,7 +1218,7 @@ int main(int argc, char **argv)
 	gluDeleteQuadric(quadric);
 
 
-
+	ovr.disable();
 	return 0;
 }
 
