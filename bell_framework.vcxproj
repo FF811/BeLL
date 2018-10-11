@@ -342,6 +342,7 @@
     <ClCompile Include="nanogui\src\widget.cpp" />
     <ClCompile Include="nanogui\src\window.cpp" />
     <ClCompile Include="openvr_integration.cpp" />
+    <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="nanogui\src\darwin.mm" />
@@ -349,6 +350,7 @@
   <ItemGroup>
     <ClInclude Include="functions.h" />
     <ClInclude Include="draw.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="openvr_integration.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
