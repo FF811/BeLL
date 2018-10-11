@@ -371,9 +371,10 @@ bool display_funktion()
 
 	if (makeitvr)
 	{
+		sumz = 0;
+		sumxy=0;
 		//super sampling 
-		glViewport(0, 0, resolution[0], resolution[1]);
-
+		glViewport(0, 0, vive.ovr.getWidth(), vive.ovr.getHeight());
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glLoadMatrixf(glm::value_ptr(vive.ovr.get_projection(0, 0.1f, 100.0f)));
@@ -426,8 +427,8 @@ bool display_funktion()
 
 		vive.ovr.composite(vive.tex[0], vive.tex[1]);
 		//super sampling
-		glViewport(0, 0, resolution[0] / 2, resolution[1] / 2);
-		vive.render_texture(0);
+		//glViewport(0, 0, resolution[0] / 2, resolution[1] / 2);
+		vive.render_texture(screenmode);
 	}
 	return true;
 }
@@ -1017,13 +1018,13 @@ int main(int argc, char **argv)
 	glPushMatrix();
 
 	scr.regen_fbo(width,height);
-	vive.regen_fbo(width, height);
+	
 	resolution[0] = width*2;
 	resolution[1] = height*2;
 	
 	glEnable(GL_TEXTURE_2D);
 	vive.ovr.enable();
-
+	vive.regen_fbo(width, height);
 
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/

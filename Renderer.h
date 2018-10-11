@@ -33,7 +33,7 @@ class Render
 public:
 	Render::Render() {
 		tex[0] = 0;
-		tex[2] = 0;
+		tex[1] = 0;
 		fbo = 0;
 		drb = 0;
 	}	
@@ -42,7 +42,7 @@ public:
 	GLuint tex[2];
 	GLuint fbo;
 	GLuint drb;
-	void regen_fbo(int w, int h);
+	
 	void render_texture(int screenmode);
 };
 
@@ -50,10 +50,12 @@ class ViveR : public Render
 {
 public:
 	COpenVR ovr;
+	void regen_fbo(int w, int h);
 };
 
 class ScreenR :public Render
 {
 public:
+	void regen_fbo(int w, int h);
 	void set_matrices(float angle, float aspect, float nearplane, float farplane, float eyedistance, int distance, bool makeit3d);
 };
