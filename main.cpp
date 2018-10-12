@@ -53,6 +53,9 @@ nanogui::CheckBox *bfsupp[10] = { nullptr };
 nanogui::Button *b = nullptr;
 nanogui::CheckBox *vrcb = nullptr;
 nanogui::ComboBox *screening = nullptr;
+nanogui::TextBox *eyedistanz = nullptr;
+
+int activefunction = NULL;
 //format of the window
 int width, height;
 //counts number of functions
@@ -572,6 +575,7 @@ int main(int argc, char **argv)
 		bf[i]->setFontSize(15);
 		bf[i]->setCallback([&] 
 		{
+			activefunction = i;
 			winwin = new Window(screen,"Funktion" );
 			winwin->setFixedSize(Vector2i(125, 200));
 			winwin->setPosition(Vector2i(220, 150));
@@ -580,7 +584,7 @@ int main(int argc, char **argv)
 			new Label(winwin, "" , "sans-bold");
 			Widget *winner = new Widget(winwin);
 			winner->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 3, 1));
-
+			
 			Button *h1 = new Button(winner,"Maximum");
 			h1->setFixedSize(Vector2i(88,20));
 			h1->setCallback([] 
@@ -741,8 +745,19 @@ int main(int argc, char **argv)
 				}
 				);
 			}
-
-
+			
+			ColorPicker *cp = new ColorPicker(winner, { 255, 120, 0, 255 });
+			cp->setFixedSize({ 100, 20 });
+			cp->setFinalCallback([](const Color &c) {
+				std::cout << "ColorPicker Final Callback: ["
+					<< c.r() << ", "
+					<< c.g() << ", "
+					<< c.b() << ", "
+					<< c.w() << "]" << std::endl;
+				red[activefunction] = c.r();
+				green[activefunction] = c.g();
+				red[activefunction] = c.b();
+				});
 			screen->performLayout();
 			});
 		bfsupp[i] = new CheckBox(Eingabe, "~");
@@ -756,7 +771,8 @@ int main(int argc, char **argv)
 	/*************************************
 	Label für Funktionsbearbeitungsbuttons
 	*************************************/
-	{
+	
+		{
 		//Button für alles markieren
 		Button *mark = new Button(w, "Alles markieren");
 		mark->setFixedSize(Vector2i(180, 20));
@@ -867,7 +883,7 @@ int main(int argc, char **argv)
 
 		new Label (Settings2, "Augenabstand:","sans-bold");
 
-		TextBox *eyedistanz = new TextBox(Settings2);
+		eyedistanz = new TextBox(Settings2);
 		eyedistanz->setEditable(true);
 		eyedistanz->setFixedSize(Vector2i(40, 20));
 		eyedistanz->setValue("0.06");
@@ -879,7 +895,7 @@ int main(int argc, char **argv)
 		distancebutton->setFontSize(18);
 		distancebutton->setTooltip("Augenabstand bestätigen");
 		distancebutton->setBackgroundColor(Color(60, 60, 60, 255));
-		distancebutton->setCallback([&distancebutton, &eyedistanz] {eyedistance = stof(eyedistanz->value()); std::cout << "set eyedistance to " << eyedistanz->value() << std::endl; });
+		distancebutton->setCallback([&distancebutton] {eyedistance = stof(eyedistanz->value()); std::cout << "set eyedistance to " << eyedistanz->value() << std::endl; });
 	
 		new Label(w, "", "sans-bold");
 		Widget *Settings3 = new Widget(w);
@@ -887,7 +903,7 @@ int main(int argc, char **argv)
 
 		new Label(Settings3, "VR einschalten:", "sans-bold");
 
-		vrcb = new CheckBox(Settings3,"Nürnberg");
+		vrcb = new CheckBox(Settings3,"");
 		vrcb->setFixedSize(Vector2i(20, 20));
 		vrcb->setVisible(true);
 		vrcb->setEnabled(true);
@@ -1039,10 +1055,10 @@ int main(int argc, char **argv)
 		glfwSwapBuffers(win);
 		vive.ovr.begin_cycle();
 		makeitvr = vrcb->checked();
-		if (screening->caption() == "Normal") { screenmode = 0; }
-		if (screening->caption() == "Anaglyph") { screenmode = 1; }
-		if (screening->caption() == "3D-Bildschirm (Stereolines)") { screenmode = 2; }
-		if (screening->caption() == "Splitted") { screenmode = 3; }
+		if (screening->caption() == "Normal") { screenmode = 0; eyedistanz->setEditable(false); eyedistance = 0; }
+		if (screening->caption() == "Anaglyph") { screenmode = 1; eyedistanz->setEditable(true); }
+		if (screening->caption() == "3D-Bildschirm (Stereolines)") { screenmode = 2; eyedistanz->setEditable(true); }
+		if (screening->caption() == "Splitted") { screenmode = 3; eyedistanz->setEditable(true); }
 	}
 	
 	// clean up!
