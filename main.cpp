@@ -75,7 +75,7 @@ float eyedistance = 0.065;
 //array for saving all functions
 std::string fct[10] = { "0 "};
 //array for saving the function's colors
-float red[10] = { 1.0,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, }, green[10] = { 1.0,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, }, blue[10] = { 1.0,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, };
+float redf[10] = { 0.1,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, }, greenf[10] = { 0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, }, bluef[10] = { 0.1,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6, };
 //parallax distance
 float paradis ;
 int screenmode=0;
@@ -296,13 +296,23 @@ void draw_plot()
 		glRotatef(sumz, 0, 0, 1);
 		glRotatef(sumxy, cos(sumz*pi / 180), -sin(sumz*pi / 180), 0);
 	}
+	
+	/*
+	glColor3f(redf[activefunction], greenf[activefunction], bluef[activefunction]);
+	glBegin(GL_QUADS);
+		glVertex3f(2, 2, 0);
+		glVertex3f(2, -2, 0);
+		glVertex3f(-2,- 2, 0);
+		glVertex3f(-2, 2, 0);
+	glEnd();
+	*/
 
 	//draw functions
 	for (int i = 0; i < functionnumber; i++)
 	{
 		if (bfsupp[i]->checked())
 		{
-			if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz, red[i], green[i], blue[i]);
+			if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz, redf[i], greenf[i], bluef[i]);
 		}
 	};
 
@@ -362,7 +372,7 @@ bool display_funktion()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0, 0, 0, 1);
 
-		//glDisable(GL_BLEND);
+		glDisable(GL_BLEND);
 		glDisable(GL_LIGHTING);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -454,7 +464,7 @@ int main(int argc, char **argv)
 	// Create nanogui gui
 	using namespace nanogui;
 	bool enabled = true;
-	
+
 
 	/*************
 	Fenster links
@@ -465,7 +475,7 @@ int main(int argc, char **argv)
 	w->setPosition(Vector2i(10, 10));
 	w->setLayout(new GroupLayout());
 
-	
+
 
 	/**************
 	Label für 2D/3D
@@ -476,7 +486,7 @@ int main(int argc, char **argv)
 		Dim->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Minimum, 0, 4));
 
 		Button *dimension = new Button(Dim, "3D");
-		dimension->setFixedSize(Vector2i(20,20));
+		dimension->setFixedSize(Vector2i(20, 20));
 		dimension->setFontSize(18);
 		dimension->setTooltip("Dimension festlegen (2D/3D)");
 		dimension->setBackgroundColor(Color(142, 69, 15, 255));
@@ -485,7 +495,7 @@ int main(int argc, char **argv)
 
 		//Combobox for screening
 
-		screening = new ComboBox(Dim, {"Normal", "Anaglyph","3D-Bildschirm (Stereolines)", "Splitted" });
+		screening = new ComboBox(Dim, { "Normal", "Anaglyph","3D-Bildschirm (Stereolines)", "Splitted" });
 		screening->setTooltip("Abbildungsmethode wählen!");
 		screening->setFontSize(15);
 		screening->setFixedSize(Vector2i(150, 20));
@@ -511,14 +521,14 @@ int main(int argc, char **argv)
 		t->setValue("x^3+y^3");
 		t->setFontSize(20);
 		t->setTooltip("Funktion eingeben");
-		
+
 
 		//Button neben Textfeld
 		Button *a = new Button(Eingabe, "~");
 		a->setFixedSize(Vector2i(20, 20));
 		a->setFontSize(28);
 		a->setTooltip("Vorlagen");
-		
+
 
 		//add Button
 		b = new Button(Eingabe, "+");
@@ -526,21 +536,21 @@ int main(int argc, char **argv)
 		b->setFontSize(28);
 		b->setTooltip("Funktion hinzufuegen");
 		b->setCallback([&t] {
-			
-		
-			
-		fct[functionnumber] = t->value(); fct[functionnumber] = to_postfix(fct[functionnumber]);
-		bf[functionnumber]->setCaption(t->value());
-		bf[functionnumber]->setEnabled(true);
-		bfsupp[functionnumber]->setEnabled(true);
-		bfsupp[functionnumber]->setChecked(true);
-		
-		if (functionnumber < 9) {
-			functionnumber++;
-		}
-		else functionnumber = 9;
-		
-		
+
+
+
+			fct[functionnumber] = t->value(); fct[functionnumber] = to_postfix(fct[functionnumber]);
+			bf[functionnumber]->setCaption(t->value());
+			bf[functionnumber]->setEnabled(true);
+			bfsupp[functionnumber]->setEnabled(true);
+			bfsupp[functionnumber]->setChecked(true);
+
+			if (functionnumber < 9) {
+				functionnumber++;
+			}
+			else functionnumber = 9;
+
+
 
 		});
 
@@ -551,19 +561,16 @@ int main(int argc, char **argv)
 	Fenster für Funktionsübersicht
 	***************************/
 	{
-	
+
 		w2 = new Window(w, "Funktionen");
 		w2->setTooltip("Bisher hinzugefuegte Funktionen");
 		w2->setFixedSize(Vector2i(180, 300));
-		w2->setLayout(new GroupLayout());	
-		
+		w2->setLayout(new GroupLayout());
+
 	}
 	
 
-	
 	//Button for fnct 
-
-
 	for (int i = 0; i < 10; i++)
 	{
 		Widget *Eingabe = new Widget(w2);
@@ -572,10 +579,16 @@ int main(int argc, char **argv)
 		bf[i]->setFixedSize(Vector2i(120, 20));
 		bf[i]->setVisible(true);
 		bf[i]->setEnabled(false);
+		bf[i]->setId(std::to_string(i));
 		bf[i]->setFontSize(15);
-		bf[i]->setCallback([&] 
+		
+		
+		bf[i]->setCallback([&] {activefunction = i; });
+		
+
+		bf[i]->setCallback([&] ()
 		{
-			activefunction = i;
+		//	activefunction = activefunction;
 			winwin = new Window(screen,"Funktion" );
 			winwin->setFixedSize(Vector2i(125, 200));
 			winwin->setPosition(Vector2i(220, 150));
@@ -745,21 +758,34 @@ int main(int argc, char **argv)
 				}
 				);
 			}
+
+
 			
 			ColorPicker *cp = new ColorPicker(winner, { 255, 120, 0, 255 });
 			cp->setFixedSize({ 100, 20 });
-			cp->setFinalCallback([](const Color &c) {
+			cp->setCallback([](const Color &c) {
 				std::cout << "ColorPicker Final Callback: ["
 					<< c.r() << ", "
 					<< c.g() << ", "
 					<< c.b() << ", "
 					<< c.w() << "]" << std::endl;
-				red[activefunction] = c.r();
-				green[activefunction] = c.g();
-				red[activefunction] = c.b();
+				redf[activefunction] = c.r();
+				greenf[activefunction] = c.g();
+				bluef[activefunction] = c.b();
+				
+				/*std::cout << "ColorPicker Final Callback: ["
+					<< redf[activefunction] << ", "
+					<< greenf[activefunction] << ", "
+					<< bluef[activefunction] << ", "
+					<< c.w() << "]" << std::endl;*/
+
+				//bf[activefunction]->setTextColor(Color(0.5,3,200, 255));
 				});
 			screen->performLayout();
 			});
+		
+
+		
 		bfsupp[i] = new CheckBox(Eingabe, "~");
 		bfsupp[i]->setFixedSize(Vector2i(20, 20));
 		bfsupp[i]->setVisible(true);
