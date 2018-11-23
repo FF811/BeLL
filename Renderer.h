@@ -57,5 +57,5 @@ class ScreenR :public Render
 {
 public:
 	void regen_fbo(int w, int h);
-	void set_matrices(float angle, float aspect, float nearplane, float farplane, float eyedistance, int distance, bool makeit3d);
+	void set_matrices(float angle, float aspect, float nearplane, float farplane, float eyedistance, int distance);
 };

@@ -15,6 +15,7 @@ void drawfunction(std::string fct, int scale,float red,float green,float blue)
 	float x = -scale;
 	float y = -scale;
 	float resolution;
+	glColor3f(red, green, blue);
 	if (d3d(fct))
 
 	{	
@@ -26,7 +27,7 @@ void drawfunction(std::string fct, int scale,float red,float green,float blue)
 			while (y < scale) {
 				
 			
-					glColor3f(red, green, blue);
+					
 					glVertex3f(x, y, to_value(fct, x, y, true));
 					glVertex3f(x + resolution,y, to_value(fct, x + resolution, y, true));
 					y = y + resolution;
@@ -43,7 +44,7 @@ void drawfunction(std::string fct, int scale,float red,float green,float blue)
 		while (x < scale)
 		{
 
-			glVertex3f(x, to_value(fct, x, y, false), 0);
+			glVertex3f(x, 0, to_value(fct, x, y, false));
 			x = x + resolution;
 
 		}
@@ -52,7 +53,7 @@ void drawfunction(std::string fct, int scale,float red,float green,float blue)
 }
 
 //draws a coordinate systen from - to + scale
-void drawcoordinates(int scale)
+void drawcoordinates(int scale,bool makeit3d)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 glLineWidth(2.0);
@@ -62,8 +63,10 @@ glBegin(GL_LINES);
 //
 glColor3f(1, 1, 0);
 glVertex3f(-scale, 0, 0); glVertex3f(scale, 0, 0);
-glColor3f(1, 0, 1);
-glVertex3f(0, -scale, 0); glVertex3f(0, scale, 0);
+if (makeit3d) {
+	glColor3f(1, 0, 1);
+	glVertex3f(0, -scale, 0); glVertex3f(0, scale, 0);
+}
 glColor3f(0, 1, 1);
 glVertex3f(0, 0, -scale); glVertex3f(0, 0, scale);
 glEnd(); 

@@ -296,28 +296,20 @@ void draw_plot()
 		glRotatef(sumz, 0, 0, 1);
 		glRotatef(sumxy, cos(sumz*pi / 180), -sin(sumz*pi / 180), 0);
 	}
-	
-	/*
-	glColor3f(redf[activefunction], greenf[activefunction], bluef[activefunction]);
-	glBegin(GL_QUADS);
-		glVertex3f(2, 2, 0);
-		glVertex3f(2, -2, 0);
-		glVertex3f(-2,- 2, 0);
-		glVertex3f(-2, 2, 0);
-	glEnd();
-	*/
+
+
 
 	//draw functions
 	for (int i = 0; i < functionnumber; i++)
 	{
 		if (bfsupp[i]->checked())
 		{
-			if (d3d(fct[i]) == makeit3d)	drawfunction(fct[i], distanz, redf[i], greenf[i], bluef[i]);
+			if ((d3d(fct[i]) == makeit3d)||!d3d(fct[i]))	drawfunction(fct[i], distanz, redf[i], greenf[i], bluef[i]);
 		}
 	};
 
 	//draw coordinate system
-	drawcoordinates(distanz);
+	drawcoordinates(distanz,makeit3d);
 
 }
 
@@ -330,7 +322,7 @@ bool display_funktion()
 		//super sampling 
 		glViewport(0, 0, resolution[0], resolution[1]);
 		//set up frustum
-		scr.set_matrices(60.0f, width / height, 0.1f, 100.0f, eyedistance, distanz, makeit3d);
+		scr.set_matrices(60.0f, width / height, 0.1f, 100.0f, eyedistance, distanz);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glLoadMatrixf(glm::value_ptr(scr.pmat[0]));
@@ -402,10 +394,6 @@ bool display_funktion()
 		glClearColor(0.0, 0.0, 0.0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-		//if (makeit3d) { /* Do something!  }
-
-
 		glColor3f(1, 1, 1);
 
 		draw_plot();
@@ -443,6 +431,8 @@ bool display_funktion()
 		//glViewport(0, 0, resolution[0] / 2, resolution[1] / 2);
 		vive.render_texture(screenmode);
 	}
+	for (int i = 0; i < 10; i++) { if (bf[i]->pushed()) activefunction = i; }
+
 	return true;
 }
 
@@ -581,144 +571,58 @@ int main(int argc, char **argv)
 		bf[i]->setEnabled(false);
 		bf[i]->setId(std::to_string(i));
 		bf[i]->setFontSize(15);
+
 		
-		
-		bf[i]->setCallback([&] {activefunction = i; });
+		//bf[i]->setCallback([&] {activefunction = i; });
 		
 
-		bf[i]->setCallback([&] ()
+		bf[i]->setCallback([&]()
 		{
-		//	activefunction = activefunction;
-			winwin = new Window(screen,"Funktion" );
-			winwin->setFixedSize(Vector2i(125, 200));
-			winwin->setPosition(Vector2i(220, 150));
-			winwin->setLayout(new GroupLayout());
-			winwin->setVisible(true);
-			new Label(winwin, "" , "sans-bold");
-			Widget *winner = new Widget(winwin);
-			winner->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 3, 1));
-			
-			Button *h1 = new Button(winner,"Maximum");
-			h1->setFixedSize(Vector2i(88,20));
-			h1->setCallback([] 
-			{
-				winwin->dispose();
-			}
-			);
+			if (winwin == nullptr) {
+		
+				winwin = new Window(screen, "Funktion");
+				winwin->setFixedSize(Vector2i(125, 200));
+				winwin->setPosition(Vector2i(220, 150));
+				winwin->setLayout(new GroupLayout());
+				winwin->setVisible(true);
+				new Label(winwin, "", "sans-bold");
+				Widget *winner = new Widget(winwin);
+				winner->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 3, 1));
 
-			Button *h2 = new Button(winner, "Minimum");
-			h2->setFixedSize(Vector2i(88, 20));
-			h2->setCallback([]
-			{
-				winwin->dispose();
-			}
-			);
-
-			Button *h3 = new Button(winner, "Farbe");
-			h3->setFixedSize(Vector2i(88, 20));
-			h3->setCallback([]
-			{
-				winwin->dispose();
-			}
-			);
-
-			Button *h4 = new Button(winner, "y-Wert");
-			h4->setFixedSize(Vector2i(88, 20));
-			h4->setCallback([]
-			{
-				winwin->dispose();
-				Window *valuewin = new Window(screen, "x Berechnung");
-				valuewin->setFixedSize(Vector2i(130, 200));
-				valuewin->setPosition(Vector2i(220, 150));
-				valuewin->setLayout(new GroupLayout());
-				valuewin->setVisible(true);
-				valuewin->setFocused(true);
-				new Label(valuewin, "", "sans-bold");
-				Widget *valuewidget = new Widget(valuewin);
-				valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
-
-				TextBox *t1 = new TextBox(valuewidget, "0");
-				t1->setEditable(true);
-				t1->setFixedSize(Vector2i(88, 20));
-				t1->setFontSize(16);
-				t1->setTooltip("y-Wert eingeben");
-
-				if (makeit3d)
-				{
-					TextBox *t2 = new TextBox(valuewidget, "0");
-					t2->setEditable(true);
-					t2->setFixedSize(Vector2i(88, 20));
-					t2->setFontSize(16);
-					t2->setTooltip("z-Wert eingeben");
-				}
-
-				Button *calc1 = new Button(valuewidget, "Berechnen");
-				calc1->setFixedSize(Vector2i(88, 20));
-				calc1->setFontSize(16);
-				calc1->setTooltip("Berechnung des y-Wertes");
-
-				TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
-				t3->setEditable(false);
-				t3->setFixedSize(Vector2i(88, 29));
-				t3->setFontSize(21);
-				t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
-
-				screen->performLayout();
-			}
-			);
-
-			Button *h5 = new Button(winner, "x-Wert");
-			h5->setFixedSize(Vector2i(88, 20));
-			h5->setCallback([]
-			{
-				winwin->dispose();
-				Window *valuewin = new Window(screen, "x Berechnung");
-				valuewin->setFixedSize(Vector2i(130, 200));
-				valuewin->setPosition(Vector2i(220, 150));
-				valuewin->setLayout(new GroupLayout());
-				valuewin->setVisible(true);
-				new Label(valuewin, "", "sans-bold");
-				Widget *valuewidget = new Widget(valuewin);
-				valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
-
-				TextBox *t1 = new TextBox(valuewidget, "0");
-				t1->setEditable(true);
-				t1->setFixedSize(Vector2i(88, 20));
-				t1->setFontSize(16);
-				t1->setTooltip("y-Wert eingeben");
-
-				if (makeit3d)
-				{
-					TextBox *t2 = new TextBox(valuewidget, "0");
-					t2->setEditable(true);
-					t2->setFixedSize(Vector2i(88, 20));
-					t2->setFontSize(16);
-					t2->setTooltip("z-Wert eingeben");
-				}
-
-				Button *calc1 = new Button(valuewidget, "Berechnen");
-				calc1->setFixedSize(Vector2i(88, 20));
-				calc1->setFontSize(16);
-				calc1->setTooltip("Berechnung des y-Wertes");
-
-				TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
-				t3->setEditable(false);
-				t3->setFixedSize(Vector2i(88, 29));
-				t3->setFontSize(21);
-				t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
-
-				screen->performLayout();
-			}
-			);
-
-			if (makeit3d) 
-			{
-				Button *h6 = new Button(winner, "z-Wert");
-				h6->setFixedSize(Vector2i(88, 20));
-				h6->setCallback([]
+				Button *h1 = new Button(winner, "Maximum");
+				h1->setFixedSize(Vector2i(88, 20));
+				h1->setCallback([]
 				{
 					winwin->dispose();
-					Window *valuewin = new Window(screen, "z Berechnung");
+					winwin = nullptr;
+				}
+				);
+
+				Button *h2 = new Button(winner, "Minimum");
+				h2->setFixedSize(Vector2i(88, 20));
+				h2->setCallback([]
+				{
+					winwin->dispose();
+					winwin = nullptr;
+				}
+				);
+
+				Button *h3 = new Button(winner, "Farbe");
+				h3->setFixedSize(Vector2i(88, 20));
+				h3->setCallback([]
+				{
+					winwin->dispose();
+					winwin = nullptr;
+				}
+				);
+
+				Button *h4 = new Button(winner, "y-Wert");
+				h4->setFixedSize(Vector2i(88, 20));
+				h4->setCallback([]
+				{
+					winwin->dispose();
+					winwin = nullptr;
+					Window *valuewin = new Window(screen, "x Berechnung");
 					valuewin->setFixedSize(Vector2i(130, 200));
 					valuewin->setPosition(Vector2i(220, 150));
 					valuewin->setLayout(new GroupLayout());
@@ -732,7 +636,7 @@ int main(int argc, char **argv)
 					t1->setEditable(true);
 					t1->setFixedSize(Vector2i(88, 20));
 					t1->setFontSize(16);
-					t1->setTooltip("x-Wert eingeben");
+					t1->setTooltip("y-Wert eingeben");
 
 					if (makeit3d)
 					{
@@ -740,7 +644,7 @@ int main(int argc, char **argv)
 						t2->setEditable(true);
 						t2->setFixedSize(Vector2i(88, 20));
 						t2->setFontSize(16);
-						t2->setTooltip("y-Wert eingeben");
+						t2->setTooltip("z-Wert eingeben");
 					}
 
 					Button *calc1 = new Button(valuewidget, "Berechnen");
@@ -757,34 +661,127 @@ int main(int argc, char **argv)
 					screen->performLayout();
 				}
 				);
-			}
+
+				Button *h5 = new Button(winner, "x-Wert");
+				h5->setFixedSize(Vector2i(88, 20));
+				h5->setCallback([]
+				{
+					winwin->dispose();
+					winwin = nullptr;
+					Window *valuewin = new Window(screen, "x Berechnung");
+					valuewin->setFixedSize(Vector2i(130, 200));
+					valuewin->setPosition(Vector2i(220, 150));
+					valuewin->setLayout(new GroupLayout());
+					valuewin->setVisible(true);
+					new Label(valuewin, "", "sans-bold");
+					Widget *valuewidget = new Widget(valuewin);
+					valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
+
+					TextBox *t1 = new TextBox(valuewidget, "0");
+					t1->setEditable(true);
+					t1->setFixedSize(Vector2i(88, 20));
+					t1->setFontSize(16);
+					t1->setTooltip("y-Wert eingeben");
+
+					if (makeit3d)
+					{
+						TextBox *t2 = new TextBox(valuewidget, "0");
+						t2->setEditable(true);
+						t2->setFixedSize(Vector2i(88, 20));
+						t2->setFontSize(16);
+						t2->setTooltip("z-Wert eingeben");
+					}
+
+					Button *calc1 = new Button(valuewidget, "Berechnen");
+					calc1->setFixedSize(Vector2i(88, 20));
+					calc1->setFontSize(16);
+					calc1->setTooltip("Berechnung des y-Wertes");
+
+					TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
+					t3->setEditable(false);
+					t3->setFixedSize(Vector2i(88, 29));
+					t3->setFontSize(21);
+					t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
+
+					screen->performLayout();
+				}
+				);
+
+				if (makeit3d)
+				{
+					Button *h6 = new Button(winner, "z-Wert");
+					h6->setFixedSize(Vector2i(88, 20));
+					h6->setCallback([]
+					{
+						winwin->dispose();
+						winwin = nullptr;
+						Window *valuewin = new Window(screen, "z Berechnung");
+						valuewin->setFixedSize(Vector2i(130, 200));
+						valuewin->setPosition(Vector2i(220, 150));
+						valuewin->setLayout(new GroupLayout());
+						valuewin->setVisible(true);
+						valuewin->setFocused(true);
+						new Label(valuewin, "", "sans-bold");
+						Widget *valuewidget = new Widget(valuewin);
+						valuewidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Maximum, 2, 6));
+
+						TextBox *t1 = new TextBox(valuewidget, "0");
+						t1->setEditable(true);
+						t1->setFixedSize(Vector2i(88, 20));
+						t1->setFontSize(16);
+						t1->setTooltip("x-Wert eingeben");
+
+						if (makeit3d)
+						{
+							TextBox *t2 = new TextBox(valuewidget, "0");
+							t2->setEditable(true);
+							t2->setFixedSize(Vector2i(88, 20));
+							t2->setFontSize(16);
+							t2->setTooltip("y-Wert eingeben");
+						}
+
+						Button *calc1 = new Button(valuewidget, "Berechnen");
+						calc1->setFixedSize(Vector2i(88, 20));
+						calc1->setFontSize(16);
+						calc1->setTooltip("Berechnung des y-Wertes");
+
+						TextBox *t3 = new TextBox(valuewidget, "Ergebnis");
+						t3->setEditable(false);
+						t3->setFixedSize(Vector2i(88, 29));
+						t3->setFontSize(21);
+						t3->setTooltip("Hier könnte Ihr Ergebnis stehen!");
+
+						screen->performLayout();
+					}
+					);
+				}
 
 
-			
-			ColorPicker *cp = new ColorPicker(winner, { 255, 120, 0, 255 });
-			cp->setFixedSize({ 100, 20 });
-			cp->setCallback([](const Color &c) {
-				std::cout << "ColorPicker Final Callback: ["
-					<< c.r() << ", "
-					<< c.g() << ", "
-					<< c.b() << ", "
-					<< c.w() << "]" << std::endl;
-				redf[activefunction] = c.r();
-				greenf[activefunction] = c.g();
-				bluef[activefunction] = c.b();
-				
-				/*std::cout << "ColorPicker Final Callback: ["
-					<< redf[activefunction] << ", "
-					<< greenf[activefunction] << ", "
-					<< bluef[activefunction] << ", "
-					<< c.w() << "]" << std::endl;*/
 
-				//bf[activefunction]->setTextColor(Color(0.5,3,200, 255));
+				ColorPicker *cp = new ColorPicker(winner, { 255, 120, 0, 255 });
+				cp->setFixedSize({ 100, 20 });
+				cp->setCallback([](const Color &c) {
+					std::cout << "ColorPicker Final Callback: ["
+						<< c.r() << ", "
+						<< c.g() << ", "
+						<< c.b() << ", "
+						<< c.w() << "]" << std::endl;
+					redf[activefunction] = c.r();
+					greenf[activefunction] = c.g();
+					bluef[activefunction] = c.b();
+
+					/*std::cout << "ColorPicker Final Callback: ["
+						<< redf[activefunction] << ", "
+						<< greenf[activefunction] << ", "
+						<< bluef[activefunction] << ", "
+						<< c.w() << "]" << std::endl;*/
+
+						//bf[activefunction]->setTextColor(Color(0.5,3,200, 255));
 				});
-			screen->performLayout();
-			});
-		
+				screen->performLayout();
+			}});
 
+		
 		
 		bfsupp[i] = new CheckBox(Eingabe, "~");
 		bfsupp[i]->setFixedSize(Vector2i(20, 20));

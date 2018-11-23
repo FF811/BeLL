@@ -197,7 +197,7 @@ void Render::render_texture(int screenmode)
 	{
 		glColorMask(true, false, false, false);
 		draw_texture(tex[0]);
-		glColorMask(false, true, false, false);
+		glColorMask(false, true, true, false);
 		draw_texture(tex[1]);
 		glColorMask(true, true, true, true);
 	}
@@ -260,7 +260,7 @@ void Render::render_texture(int screenmode)
 	
 }
 
-void ScreenR::set_matrices(float angle, float aspect, float nearplane, float farplane, float eyedistance, int distance, bool makeit3d)
+void ScreenR::set_matrices(float angle, float aspect, float nearplane, float farplane, float eyedistance, int distance)
 {
 	float x = eyedistance / 2.0f;
 	int paradis = distance;
