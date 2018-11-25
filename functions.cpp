@@ -30,15 +30,15 @@ bool ifoperator(char C)
 }
 
 //checks if there is a function at point i of the string, returns that function. Otherwise returns "no"
-string iffunction(int i, string post)
+char iffunction(int i, string post)
 {
 	string f = "";
 	for (int j = i; post[j] <= 'z' && post[j] >= 'a'; ++j)
 	{
 		f += post[j];
 	}
-	if (f == "sin" || f == "cos" || f == "tan" || f == "log" || f == "sqrt" /*|| f == "ln"*/) return f;
-	else return "no";
+	if (f == "sin" || f == "cos" || f == "tan" || f == "log" || f == "rot" /*|| f == "ln"*/) return f[0];
+	else return 'n';
 }
 
 //output: a value for comparing operators
@@ -91,26 +91,29 @@ std::string to_postfix(std::string infix)
 		}
 		else if (infix[i] == '(')
 		{
-			s.push('(');
+			if (i >= 3) {
+				if (iffunction(i - 3, infix) != 'n') {
+					s.push(iffunction(i - 3, infix));
+				}
+				else s.push('(');
+			}
+			else { s.push('('); }
 		}
 		else if (infix[i] == ')' && !s.empty())
 		{
-			while (s.top() != '(')
+			while (s.top() != '(' && !(s.top()>='a' && s.top()<= 'z'))
 			{
 				post += s.top();
 				post += ' ';
 				s.pop();
 			}
-			s.pop();
-			if (!function.empty())
-			{
-				post += function.top();
-				function.pop();
+			if (s.top() == '(') { s.pop(); }
+			else {
+				post += s.top();
 				post += ' ';
+				s.pop();
 			}
 		}
-		else if (infix[i] >= 'a' && infix[i] <= 'z')
-			if (iffunction(i, infix) != "no") { function.push(iffunction(i, infix)); }
 
 	}
 	while (!s.empty())
@@ -186,19 +189,18 @@ float to_value(string post, float x, float y, bool d)
 		}
 		else if (post[i] >= 'a' && post[i] <= 'z')
 		{
-			string f = iffunction(i, post);
-			if (f != "no")
-			{
+				char f = post[i];
 				op1 = s.top();
 				s.pop();
-				if (f == "sin") s.push(sin(op1*pi / 180));
-				else if (f == "cos") s.push(cos(op1*pi / 180));
-				else if (f == "log") s.push(log10(op1));
-				else if (f == "tan") s.push(tan(op1*pi / 180));
-				else if (f == "sqrt") s.push(sqrt(op1));
-				else if (f == "ln") s.push(log(op1));
-				if (s.top() <= 0.000000001 && s.top() >= -0.000000001) { s.pop(); s.push(0.0); }
-			}
+				if (f == 's') op1 = (sin(op1*pi / 180));
+				else if (f == 'c') op1 = (cos(op1*pi / 180));
+				//else if (f == 'l') op1 = (log10(op1));
+				else if (f == 't') op1 = (tan(op1*pi / 180));
+				else if (f == 'r')op1 = (sqrt(op1));
+				else if (f == 'l') s.push(log(op1));
+				//if (s.top() <= 0.000000001 && s.top() >= -0.000000001) { s.pop(); s.push(0.0); }
+				s.push(op1);
+			
 		}
 
 	}

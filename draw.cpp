@@ -17,7 +17,6 @@ void drawfunction(std::string fct, int scale,float red,float green,float blue)
 	float resolution;
 	glColor3f(red, green, blue);
 	if (d3d(fct))
-
 	{	
 		resolution = -x / 20;
 		while (x < scale)

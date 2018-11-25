@@ -1064,7 +1064,6 @@ int main(int argc, char **argv)
 	glEnable(GL_TEXTURE_2D);
 	vive.ovr.enable();
 	vive.regen_fbo(width, height);
-
 	// the main loop. as long as the display funtion returns true and the window
 	// should not be closed swap the buffers and poll events.*/
 	while (display_funktion() && !glfwWindowShouldClose(win))

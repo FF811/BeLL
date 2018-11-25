@@ -16,7 +16,7 @@ bool d3d(string s);
 //checks if c is an operator
 bool ifoperator(char C);
 //checks if there is a function at point i of the string, returns that function. Otherwise returns "no"
-string iffunction(int i, string post);
+char iffunction(int i, string post);
 
 //output: a value for comparing operators
 int getvalue(char c);
