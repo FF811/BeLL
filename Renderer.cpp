@@ -263,7 +263,8 @@ void Render::render_texture(int screenmode)
 void ScreenR::set_matrices(float angle, float aspect, float nearplane, float farplane, float eyedistance, int distance)
 {
 	float x = eyedistance / 2.0f;
-	int paradis = distance;
+	//int paradis = distance;
+	int paradis = 1;
 	float o = (eyedistance / 2 * 0.1) / paradis;
 	float top = tan(glm::radians(angle) / 2)*0.1f,
 	bottom = -top,

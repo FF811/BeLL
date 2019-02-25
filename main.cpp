@@ -200,6 +200,7 @@ static void callback_CursorMove(GLFWwindow *win, double x, double y)
 {
 	void* user_pointer = glfwGetWindowUserPointer(win);
 	screen->cursorPosCallbackEvent(x, y);
+	std::cout << x << "   " << y << std::endl;
 		diffxy = y - counterxy;
 		diffz = x - counterz;
 	counterxy = y;
