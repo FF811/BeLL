@@ -31,6 +31,8 @@ using namespace glm;
 
 // GLU gives us the ability to draw simple geometric shapes
 #include <gl/GLU.h>
+#include "stb_image.h"
+
 
  /****************************************************************************
  * WINDOW-RELATED CALLBACKS                                                 *
@@ -83,7 +85,7 @@ bool makeitvr = false;
 //projection matrices
 glm::mat4 p[2];
 //rtt stuff
-
+GLuint floor_texture;
 
 
 GLuint resolution[2] = { 0,0 };
@@ -286,6 +288,28 @@ GLUquadric* quadric;
 
 void draw_plot()
 {
+	//enable light staff
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	
+	//light values
+	float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	float diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
+	float specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float position[] = { -2.0f, 2.0f, -2.0f, 1.0f };
+
+	//set light
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glShadeModel(GL_FLAT);
+	glColor3f(1, 1, 1);
+
 	if (wired) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 
 	else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
@@ -314,6 +338,26 @@ void draw_plot()
 
 }
 
+void draw_floor() {
+
+	glBindTexture(GL_TEXTURE_2D, floor_texture);
+	glColor3f(1, 1, 1);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);
+	glVertex3f(4, 0,4);
+	glTexCoord2f(-8, 0);
+	glVertex3f(-4, 0,4);
+	glTexCoord2f(-8, -8);
+	glVertex3f(-4, 0,-4);
+	glTexCoord2f(0, -8);
+	glVertex3f(4,0, -4);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
+}
+
 // main display function. this will be called twice per frame.
 bool display_funktion()
 {
@@ -337,6 +381,7 @@ bool display_funktion()
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, scr.tex[0], 0);
 		glClearColor(0.0, 0.0, 0.0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 		draw_plot();
 
@@ -397,7 +442,13 @@ bool display_funktion()
 
 		glColor3f(1, 1, 1);
 
+		glPushMatrix();
+		glTranslatef(0, 1, 0);
+		glScalef(0.2, 0.2, 0.2);
+		glRotatef(90, 1, 0, 0);
 		draw_plot();
+		glPopMatrix();
+		draw_floor();
 
 		//set up frustum
 		glPopMatrix();
@@ -417,10 +468,13 @@ bool display_funktion()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		glPushMatrix();
+		glTranslatef(0,1,0);
+		glScalef(0.2, 0.2, 0.2);
+		glRotatef(90, 1, 0, 0);
 		draw_plot();
-
-		//clear nearly all
 		glPopMatrix();
+		draw_floor();
+		//clear nearly all
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0, 0, 0, 1);
 		//glDisable(GL_BLEND);
@@ -443,6 +497,23 @@ bool display_funktion()
  * PROGRAM ENTRY POINT                                                      *
  ****************************************************************************/
 
+void load_the_floor_texture()
+{
+	glGenTextures(1, &floor_texture);
+	glBindTexture(GL_TEXTURE_2D, floor_texture);
+	
+	int w, h, c;
+	unsigned char* data = stbi_load("floor.png", &w, &h, &c, 4);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	free(data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
 
 int main(int argc, char **argv)
 {
@@ -452,6 +523,7 @@ int main(int argc, char **argv)
 	screen = new nanogui::Screen();
 	screen->initialize(win, false);
 
+	load_the_floor_texture();
 	// Create nanogui gui
 	using namespace nanogui;
 	bool enabled = true;
@@ -1022,25 +1094,7 @@ int main(int argc, char **argv)
 	screen->setVisible(true);
 	screen->performLayout();
 
-	//enable light staff
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-	//light values
-	float ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-	float diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
-	float specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float position[] = { -2.0f, 2.0f, -2.0f, 1.0f };
-
-	//set light
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
-	glColor3f(1, 1, 1);
+	
 
 	//glClearColor(1, 0, 0, 1);
 	quadric = gluNewQuadric();
@@ -1094,5 +1148,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #endif

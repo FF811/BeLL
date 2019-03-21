@@ -32,7 +32,7 @@
 void draw_texture(GLuint tex)
 {
 	glBindTexture(GL_TEXTURE_2D, tex);
-
+	glColor3f(1 , 1, 1);
 	glBegin(GL_QUADS);
 
 	glTexCoord2f(0, 0);
