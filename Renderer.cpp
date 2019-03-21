@@ -195,6 +195,11 @@ void Render::render_texture(int screenmode)
 	}
 	if (screenmode == 1)
 	{
+		glDisable(GL_LIGHTING);
+		glDisable(GL_LIGHT0);
+		glDisable(GL_COLOR_MATERIAL);
+		glDisable(GL_DEPTH_TEST);
+
 		glColorMask(true, false, false, false);
 		draw_texture(tex[0]);
 		glColorMask(false, true, true, false);
